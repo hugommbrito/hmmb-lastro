@@ -1,0 +1,36 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Env (segredos nunca no repositório)
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+.npm/
+.eslintcache
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Editores
+.idea/
+*.swp

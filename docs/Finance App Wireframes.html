@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMMB Finance – Wireframes</title>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Jost', sans-serif; background: #f0eee9; }
+
+  /* ── MUI-style tokens ── */
+  :root {
+    --bg0:     #060d1a;
+    --bg1:     #0a1628;
+    --bg2:     #0f1e35;
+    --bg3:     #152540;
+    --bg4:     #1b2e4e;
+    --accent:  #4080ff;
+    --accent2: #7aaeff;
+    --accentd: #1a3a80;
+    --success: #22c55e;
+    --danger:  #f04747;
+    --warn:    #f59e0b;
+    --txt:     #d0e0f5;
+    --txt2:    #6a8aaa;
+    --txt3:    #3d5a7a;
+    --border:  rgba(80,140,220,0.12);
+    --border2: rgba(80,140,220,0.22);
+  }
+
+  /* ── MUI-look components ── */
+  .mui-paper   { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; }
+  .mui-paper-2 { background: var(--bg1); border: 1px solid var(--border); border-radius: 8px; }
+  .mui-chip    { display:inline-flex; align-items:center; height:22px; padding:0 8px; border-radius:11px; font-family:'Jost',sans-serif; font-size:11px; font-weight:500; letter-spacing:.3px; }
+  .mui-btn     { display:inline-flex; align-items:center; justify-content:center; height:32px; padding:0 14px; border-radius:6px; font-family:'Jost',sans-serif; font-size:13px; font-weight:500; letter-spacing:.4px; cursor:pointer; border:none; gap:5px; }
+  .mui-btn-outlined { background:transparent; border:1px solid var(--border2); color:var(--txt2); }
+  .mui-btn-contained { background:var(--accent); color:#fff; box-shadow:0 2px 8px rgba(64,128,255,0.35); }
+  .mui-btn-text { background:transparent; border:none; color:var(--accent2); }
+  .mui-input   { background:var(--bg3); border:1px solid var(--border2); border-radius:6px; padding:8px 12px; font-family:'Jost',sans-serif; font-size:13px; color:var(--txt); width:100%; outline:none; }
+  .mui-input::placeholder { color:var(--txt3); }
+  .mui-select  { background:var(--bg3); border:1px solid var(--border2); border-radius:6px; padding:8px 12px; font-family:'Jost',sans-serif; font-size:13px; color:var(--txt); width:100%; }
+  .mui-table   { width:100%; border-collapse:collapse; }
+  .mui-table th { font-family:'Jost',sans-serif; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.7px; color:var(--txt3); padding:10px 14px; border-bottom:1px solid var(--border); text-align:left; }
+  .mui-table td { font-family:'Jost',sans-serif; font-size:13px; color:var(--txt); padding:12px 14px; border-bottom:1px solid var(--border); }
+  .mui-table tr:last-child td { border-bottom:none; }
+  .mui-table tr:hover td { background:var(--bg3); }
+  .mui-divider { height:1px; background:var(--border); margin:0; }
+  .mono { font-family:'Space Mono',monospace; }
+  .pos { color: var(--success) !important; }
+  .neg { color: var(--danger) !important; }
+</style>
+</head>
+<body>
+<script type="text/babel">
+
+/* ─────────────── TWEAK DEFAULTS ─────────────── */
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "palette": "ocean",
+  "surface": "glass",
+  "density": "compact"
+}/*EDITMODE-END*/;
+
+/* ─────────────── PALETTES ─────────────── */
+const PALETTES = {
+  ocean:   { accent:'#4080ff', accent2:'#7aaeff', accentd:'#1a3a80', success:'#22c55e', danger:'#f04747', bg0:'#060d1a', bg1:'#0a1628', bg2:'#0f1e35', bg3:'#152540', bg4:'#1b2e4e' },
+  emerald: { accent:'#10b981', accent2:'#6ee7b7', accentd:'#064e3b', success:'#34d399', danger:'#f87171', bg0:'#020f0a', bg1:'#051a10', bg2:'#07261a', bg3:'#0a3322', bg4:'#0e4028' },
+  violet:  { accent:'#7c3aed', accent2:'#c4b5fd', accentd:'#3b0764', success:'#22c55e', danger:'#f04747', bg0:'#08040f', bg1:'#110a1e', bg2:'#19102e', bg3:'#22163e', bg4:'#2b1c50' },
+  amber:   { accent:'#d97706', accent2:'#fcd34d', accentd:'#451a03', success:'#22c55e', danger:'#f04747', bg0:'#0c0800', bg1:'#1a1100', bg2:'#261900', bg3:'#33230a', bg4:'#3d2c10' },
+};
+
+/* ─────────────── DYNAMIC STYLES ─────────────── */
+const DynamicStyles = ({ palette, surface, density }) => {
+  const p = PALETTES[palette] || PALETTES.ocean;
+  const densityVars = {
+    compact:     { cellPad:'8px 12px', cardPad:'10px 12px', fontSize:'12px', thSize:'10px' },
+    comfortable: { cellPad:'12px 14px', cardPad:'14px 16px', fontSize:'13px', thSize:'11px' },
+    spacious:    { cellPad:'17px 18px', cardPad:'18px 20px', fontSize:'14px', thSize:'12px' },
+  }[density] || {};
+  const d = densityVars;
+
+  const surfaceCSS = {
+    flat: `
+      .mui-paper   { background: var(--bg2); border: 1px solid var(--border); box-shadow: none; }
+      .mui-paper-2 { background: var(--bg1); border: 1px solid var(--border); box-shadow: none; }
+    `,
+    glass: `
+      .mui-paper   { background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%); border: 1px solid rgba(255,255,255,0.12); backdrop-filter: blur(12px); box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+      .mui-paper-2 { background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(8px); }
+    `,
+    outlined: `
+      .mui-paper   { background: var(--bg2); border: 2px solid var(--border2); box-shadow: none; border-radius: 6px; }
+      .mui-paper-2 { background: var(--bg1); border: 2px solid var(--border); box-shadow: none; }
+    `,
+  }[surface] || '';
+
+  const css = `
+    :root {
+      --accent:  ${p.accent};
+      --accent2: ${p.accent2};
+      --accentd: ${p.accentd};
+      --success: ${p.success};
+      --danger:  ${p.danger};
+      --bg0: ${p.bg0}; --bg1: ${p.bg1}; --bg2: ${p.bg2}; --bg3: ${p.bg3}; --bg4: ${p.bg4};
+    }
+    .mui-table td { padding: ${d.cellPad}; font-size: ${d.fontSize}; }
+    .mui-table th { padding: ${d.cellPad}; font-size: ${d.thSize}; }
+    .mui-paper > div, .stat-card { padding: ${d.cardPad}; }
+    ${surfaceCSS}
+  `;
+  return <style dangerouslySetInnerHTML={{ __html: css }} />;
+};
+
+/* ─────────────── TREE DATA ─────────────── */
+const TREE = [
+  { id:'a', label:'Aposentadoria', type:'folder', open:true, children:[
+    { id:'a1', label:'Renda Fixa', type:'folder', open:true, children:[
+      { id:'a1a', label:'Tesouro IPCA+ 2035', type:'asset', tag:'TD' },
+      { id:'a1b', label:'CDB Nubank 120% CDI', type:'asset', tag:'CDB' },
+      { id:'a1c', label:'LCI Bradesco', type:'asset', tag:'LCI' },
+    ]},
+    { id:'a2', label:'Renda Variável', type:'folder', open:false, children:[
+      { id:'a2a', label:'ITSA4', type:'asset', tag:'Ação' },
+      { id:'a2b', label:'VALE3', type:'asset', tag:'Ação' },
+      { id:'a2c', label:'KNRI11', type:'asset', tag:'FII' },
+    ]},
+  ]},
+  { id:'b', label:'Reserva de Emergência', type:'folder', open:false, children:[
+    { id:'b1', label:'Tesouro Selic 2027', type:'asset', tag:'TD' },
+  ]},
+  { id:'c', label:'Carteira Agressiva', type:'folder', open:false, children:[
+    { id:'c1', label:'Internacional', type:'folder', open:false, children:[
+      { id:'c1a', label:'VTI', type:'asset', tag:'ETF' },
+      { id:'c1b', label:'AAPL', type:'asset', tag:'Ação' },
+    ]},
+    { id:'c2', label:'Cripto', type:'folder', open:false, children:[
+      { id:'c2a', label:'Bitcoin', type:'asset', tag:'Cripto' },
+    ]},
+  ]},
+];
+
+/* ─────────────── SHARED UI ─────────────── */
+
+const BrowserShell = ({ children }) => (
+  <div style={{ width:1200, height:740, display:'flex', flexDirection:'column', background:VAR('bg0'), borderRadius:10, border:'2px solid #222', boxShadow:'6px 6px 0 #181818', overflow:'hidden', flexShrink:0 }}>
+    <div style={{ height:40, background:'#111827', borderBottom:'1px solid #1e2a3a', display:'flex', alignItems:'center', padding:'0 14px', gap:8, flexShrink:0 }}>
+      {['#ff5f57','#ffbd2e','#28c840'].map((c,i)=><div key={i} style={{ width:11,height:11,borderRadius:'50%',background:c }} />)}
+      <div style={{ flex:1, background:'#0d1b2e', border:'1px solid #1e2a3a', borderRadius:5, height:24, display:'flex', alignItems:'center', paddingLeft:10, fontSize:11, color:'#3d5a7a', fontFamily:'Jost,sans-serif', letterSpacing:.3 }}>
+        🔒 app.hmmb.finance
+      </div>
+    </div>
+    <div style={{ flex:1, display:'flex', overflow:'hidden' }}>{children}</div>
+  </div>
+);
+
+const VAR = k => `var(--${k})`;
+
+// Sidebar with recursive tree
+const TreeNode = ({ node, depth=0, activeId, onSelect }) => {
+  const isFolder = node.type === 'folder';
+  const isActive = activeId === node.id;
+  const tagColors = { TD:'#4080ff', CDB:'#22c55e', LCI:'#a78bfa', FII:'#f59e0b', Ação:'#38bdf8', ETF:'#f97316', Cripto:'#fb923c' };
+  return (
+    <div>
+      <div
+        onClick={()=>onSelect(node.id)}
+        style={{
+          display:'flex', alignItems:'center', gap:6,
+          padding:`6px 12px 6px ${14+depth*18}px`,
+          cursor:'pointer', borderRadius:0,
+          background: isActive ? 'rgba(64,128,255,0.15)' : 'transparent',
+          borderLeft: isActive ? '2px solid var(--accent)' : '2px solid transparent',
+          transition:'background .1s',
+        }}
+      >
+        {isFolder ? (
+          <span style={{ fontSize:12, color:'var(--txt3)', width:12, textAlign:'center', flexShrink:0 }}>
+            {node.open !== false ? '▾' : '▸'}
+          </span>
+        ) : (
+          <span style={{ width:12, fontSize:9, color:'var(--txt3)', flexShrink:0, textAlign:'center' }}>●</span>
+        )}
+        <span style={{ fontSize:13, fontWeight: isFolder ? 500 : 400, color: isActive ? 'var(--txt)' : 'var(--txt2)', flex:1, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', letterSpacing:.2 }}>
+          {node.label}
+        </span>
+        {!isFolder && node.tag && (
+          <span className="mui-chip" style={{ background: (tagColors[node.tag]||'#4080ff')+'22', color: tagColors[node.tag]||'var(--accent2)', border:`1px solid ${(tagColors[node.tag]||'#4080ff')}44`, flexShrink:0 }}>{node.tag}</span>
+        )}
+      </div>
+      {isFolder && node.open !== false && node.children?.map(ch=>(
+        <TreeNode key={ch.id} node={ch} depth={depth+1} activeId={activeId} onSelect={onSelect} />
+      ))}
+    </div>
+  );
+};
+
+const Sidebar = ({ activeId='a1', onSelect=()=>{} }) => (
+  <div style={{ width:240, background:'var(--bg1)', borderRight:'1px solid var(--border)', display:'flex', flexDirection:'column', flexShrink:0, height:'100%', overflow:'hidden' }}>
+    {/* Logo */}
+    <div style={{ padding:'16px 16px 12px', borderBottom:'1px solid var(--border)' }}>
+      <div style={{ fontSize:17, fontWeight:700, color:'var(--txt)', letterSpacing:-.3 }}>HMMB</div>
+      <div style={{ fontSize:11, color:'var(--txt3)', letterSpacing:1.5, textTransform:'uppercase', fontWeight:500 }}>Finance</div>
+    </div>
+    {/* Nav */}
+    <div style={{ padding:'10px 0 6px' }}>
+      {[{icon:'⊞', label:'Dashboard'},{icon:'◎', label:'Performance'},{icon:'≡', label:'Relatórios'}].map((n,i)=>(
+        <div key={i} style={{ display:'flex',alignItems:'center',gap:10,padding:'8px 16px',cursor:'pointer', borderLeft: i===0?'2px solid var(--accent)':'2px solid transparent', background:i===0?'rgba(64,128,255,.12)':'transparent' }}>
+          <span style={{ fontSize:14, color: i===0?'var(--accent)':'var(--txt3)' }}>{n.icon}</span>
+          <span style={{ fontSize:13, fontWeight:500, color: i===0?'var(--txt)':'var(--txt2)', letterSpacing:.2 }}>{n.label}</span>
+        </div>
+      ))}
+    </div>
+    <div className="mui-divider" />
+    {/* Tree label */}
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 14px 4px' }}>
+      <span style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:1.2, color:'var(--txt3)' }}>Carteiras</span>
+      <span style={{ fontSize:18, color:'var(--txt3)', cursor:'pointer', lineHeight:1 }}>+</span>
+    </div>
+    {/* Tree */}
+    <div style={{ flex:1, overflowY:'auto', padding:'4px 0' }}>
+      {TREE.map(n=><TreeNode key={n.id} node={n} activeId={activeId} onSelect={onSelect} />)}
+      <div style={{ margin:'8px 12px', border:'1px dashed var(--border2)', borderRadius:6, padding:'7px 12px', textAlign:'center', cursor:'pointer' }}>
+        <span style={{ fontSize:12, color:'var(--txt3)' }}>+ Nova carteira</span>
+      </div>
+    </div>
+    {/* User */}
+    <div style={{ padding:'12px 14px', borderTop:'1px solid var(--border)', display:'flex', alignItems:'center', gap:8 }}>
+      <div style={{ width:28,height:28,borderRadius:'50%',background:'var(--accentd)',border:'2px solid var(--accent)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:600,color:'var(--accent)',flexShrink:0 }}>M</div>
+      <div>
+        <div style={{ fontSize:13, fontWeight:500, color:'var(--txt)' }}>Matheus</div>
+        <div style={{ fontSize:11, color:'var(--txt3)' }}>Pro</div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ─────────────── STAT CARD ─────────────── */
+const StatCard = ({ label, value, sub, valueColor }) => (
+  <div className="mui-paper" style={{ flex:1, padding:'14px 16px' }}>
+    <div style={{ fontSize:11, fontWeight:500, textTransform:'uppercase', letterSpacing:.8, color:'var(--txt3)', marginBottom:6 }}>{label}</div>
+    <div style={{ fontSize:20, fontWeight:600, color: valueColor||'var(--txt)', letterSpacing:-.3 }}>{value}</div>
+    {sub && <div style={{ fontSize:12, color:'var(--txt3)', marginTop:4 }}>{sub}</div>}
+  </div>
+);
+
+/* ═══════════════════════════════
+   TELA 1 — DASHBOARD
+═══════════════════════════════ */
+const Screen_Dashboard = () => (
+  <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+    {/* Topbar */}
+    <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+      <span style={{ fontSize:16, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Dashboard</span>
+      <div style={{ display:'flex', gap:8 }}>
+        <button className="mui-btn mui-btn-outlined">+ Carteira</button>
+        <button className="mui-btn mui-btn-contained">+ Ativo</button>
+      </div>
+    </div>
+    <div style={{ flex:1, overflowY:'auto', padding:'22px 24px' }}>
+      {/* KPIs */}
+      <div style={{ display:'flex', gap:12, marginBottom:22 }}>
+        <StatCard label="Patrimônio total" value="R$ 483.900" sub="↑ +2,1% este mês" />
+        <StatCard label="Rentab. 12 meses" value="+14,3%" sub="vs CDI: +2,1 p.p." valueColor="var(--success)" />
+        <StatCard label="Renda Fixa" value="47%" sub="meta: 50%" valueColor="var(--accent2)" />
+        <StatCard label="Total de ativos" value="41" sub="em 3 carteiras-raiz" />
+      </div>
+
+      {/* Tree overview cards */}
+      <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Visão por Carteira</div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:14 }}>
+        {[
+          { label:'Aposentadoria', val:'R$ 312.400', rentab:'+12,6%', pos:true, color:'#4080ff',
+            subs:[ {l:'Renda Fixa', v:'R$ 180k', p:58}, {l:'Renda Variável', v:'R$ 132k', p:42} ] },
+          { label:'Reserva de Emergência', val:'R$ 48.000', rentab:'+10,8%', pos:true, color:'#22c55e',
+            subs:[ {l:'Tesouro Selic', v:'R$ 48k', p:100} ] },
+          { label:'Carteira Agressiva', val:'R$ 95.700', rentab:'-1,4%', pos:false, color:'#f04747',
+            subs:[ {l:'Internacional', v:'R$ 63k', p:66}, {l:'Cripto', v:'R$ 33k', p:34} ] },
+        ].map((g,i)=>(
+          <div key={i} className="mui-paper" style={{ overflow:'hidden' }}>
+            <div style={{ borderBottom:'1px solid var(--border)', padding:'12px 16px', display:'flex', justifyContent:'space-between', alignItems:'center', background:g.color+'0d' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                <div style={{ width:9,height:9,borderRadius:2,background:g.color }} />
+                <span style={{ fontSize:14, fontWeight:600, color:'var(--txt)' }}>{g.label}</span>
+              </div>
+              <div style={{ textAlign:'right' }}>
+                <div style={{ fontSize:14, fontWeight:600, color:'var(--txt)' }}>{g.val}</div>
+                <div style={{ fontSize:12, color: g.pos?'var(--success)':'var(--danger)' }}>{g.rentab} / 12m</div>
+              </div>
+            </div>
+            <div style={{ padding:'10px 16px 14px' }}>
+              {g.subs.map((s,si)=>(
+                <div key={si} style={{ marginBottom: si<g.subs.length-1?10:0 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+                    <span style={{ fontSize:12, color:'var(--txt2)' }}>{s.l}</span>
+                    <span style={{ fontSize:12, color:'var(--txt3)', fontFamily:'monospace' }}>{s.v}</span>
+                  </div>
+                  <div style={{ background:'var(--bg3)', borderRadius:100, height:5, overflow:'hidden' }}>
+                    <div style={{ width:`${s.p}%`, height:'100%', background:g.color, borderRadius:100 }} />
+                  </div>
+                </div>
+              ))}
+              <div style={{ marginTop:12, display:'flex', justifyContent:'flex-end' }}>
+                <button className="mui-btn mui-btn-text" style={{ fontSize:12 }}>Abrir →</button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent table */}
+      <div style={{ marginTop:22 }}>
+        <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Últimas Movimentações</div>
+        <div className="mui-paper" style={{ overflow:'hidden' }}>
+          <table className="mui-table">
+            <thead><tr>
+              <th>Ativo</th><th>Carteira</th><th>Tipo</th><th style={{textAlign:'right'}}>Valor</th><th style={{textAlign:'right'}}>Data</th>
+            </tr></thead>
+            <tbody>
+              {[
+                {a:'Tesouro IPCA+ 2035',c:'Aposentadoria / Renda Fixa',t:'Compra',v:'+R$ 10.000',d:'22 abr',pos:true},
+                {a:'VALE3',c:'Aposentadoria / Renda Variável',t:'Compra',v:'+R$ 3.200',d:'20 abr',pos:true},
+                {a:'Bitcoin',c:'Agressiva / Cripto',t:'Compra',v:'+R$ 5.000',d:'18 abr',pos:true},
+                {a:'KNRI11',c:'Aposentadoria / Renda Variável',t:'Dividendo',v:'+R$ 480',d:'15 abr',pos:true},
+              ].map((r,i)=>(
+                <tr key={i}>
+                  <td style={{ fontWeight:500 }}>{r.a}</td>
+                  <td style={{ color:'var(--txt3)', fontSize:12 }}>{r.c}</td>
+                  <td><span className="mui-chip" style={{ background:'var(--bg3)', color:'var(--txt2)', border:'1px solid var(--border2)' }}>{r.t}</span></td>
+                  <td style={{ textAlign:'right', color: r.pos?'var(--success)':'var(--danger)', fontWeight:500 }}>{r.v}</td>
+                  <td style={{ textAlign:'right', color:'var(--txt3)', fontSize:12 }}>{r.d}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════
+   TELA 2 — DETALHE DE CARTEIRA (com sub-carteiras e ativos)
+═══════════════════════════════ */
+const Screen_Portfolio = () => (
+  <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+    <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <span style={{ fontSize:12, color:'var(--txt3)', cursor:'pointer' }}>Dashboard</span>
+        <span style={{ color:'var(--border2)' }}>›</span>
+        <span style={{ fontSize:12, color:'var(--txt3)', cursor:'pointer' }}>Aposentadoria</span>
+        <span style={{ color:'var(--border2)' }}>›</span>
+        <span style={{ fontSize:14, fontWeight:600, color:'var(--txt)' }}>Renda Fixa</span>
+      </div>
+      <div style={{ display:'flex', gap:8 }}>
+        <button className="mui-btn mui-btn-outlined">⚙ Editar</button>
+        <button className="mui-btn mui-btn-outlined">+ Sub-carteira</button>
+        <button className="mui-btn mui-btn-contained">+ Ativo</button>
+      </div>
+    </div>
+
+    <div style={{ flex:1, overflowY:'auto', padding:'22px 24px' }}>
+      {/* Portfolio header */}
+      <div style={{ display:'flex', gap:12, marginBottom:22 }}>
+        <StatCard label="Valor total" value="R$ 180.000" sub="atualizado agora" />
+        <StatCard label="Rentab. 12m" value="+12,6%" sub="IPCA+2,1%" valueColor="var(--success)" />
+        <StatCard label="vs CDI 12m" value="+0,4 p.p." sub="CDI: 12,2%" valueColor="var(--accent2)" />
+        <StatCard label="Ativos" value="4" sub="nesta carteira" />
+      </div>
+
+      {/* Assets table */}
+      <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Ativos</div>
+      <div className="mui-paper" style={{ overflow:'hidden', marginBottom:20 }}>
+        <table className="mui-table">
+          <thead><tr>
+            <th>Nome</th><th>Tipo</th><th style={{textAlign:'right'}}>Investido</th><th style={{textAlign:'right'}}>Atual</th><th style={{textAlign:'right'}}>Rentab.</th><th>Venc.</th><th style={{textAlign:'right'}}>Peso</th><th></th>
+          </tr></thead>
+          <tbody>
+            {[
+              {n:'Tesouro IPCA+ 2035',t:'Tesouro Direto',inv:'R$ 90.000',cur:'R$ 90.000',r:'+12,4%',v:'mai/2035',p:50,pos:true},
+              {n:'CDB Nubank 120% CDI',t:'CDB',inv:'R$ 50.000',cur:'R$ 50.000',r:'+13,1%',v:'jan/2026',p:28,pos:true},
+              {n:'LCI Bradesco 95% CDI',t:'LCI',inv:'R$ 24.000',cur:'R$ 24.000',r:'+11,8%',v:'out/2025',p:13,pos:true},
+              {n:'Tesouro Selic 2027',t:'Tesouro Direto',inv:'R$ 16.000',cur:'R$ 16.000',r:'+10,9%',v:'mar/2027',p:9,pos:true},
+            ].map((a,i)=>(
+              <tr key={i} style={{ cursor:'pointer' }}>
+                <td>
+                  <div style={{ fontWeight:500, fontSize:13 }}>{a.n}</div>
+                  <div style={{ marginTop:4, height:3, background:'var(--bg4)', borderRadius:100, width:80, overflow:'hidden' }}>
+                    <div style={{ width:`${a.p}%`, height:'100%', background:'var(--accent)', borderRadius:100 }} />
+                  </div>
+                </td>
+                <td><span className="mui-chip" style={{ background:'var(--accentd)', color:'var(--accent2)', border:'1px solid var(--border2)' }}>{a.t}</span></td>
+                <td style={{ textAlign:'right', color:'var(--txt2)' }}>{a.inv}</td>
+                <td style={{ textAlign:'right', fontWeight:500 }}>{a.cur}</td>
+                <td style={{ textAlign:'right', fontWeight:600, color: a.pos?'var(--success)':'var(--danger)' }}>{a.r}</td>
+                <td style={{ color:'var(--txt3)', fontSize:12 }}>{a.v}</td>
+                <td style={{ textAlign:'right', color:'var(--txt3)', fontSize:12 }}>{a.p}%</td>
+                <td style={{ textAlign:'right' }}>
+                  <button className="mui-btn mui-btn-text" style={{ fontSize:12, padding:'0 8px' }}>···</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Sub-carteiras section */}
+      <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Sub-carteiras</div>
+      <div style={{ border:'1px dashed var(--border2)', borderRadius:8, padding:'20px', textAlign:'center', color:'var(--txt3)' }}>
+        <div style={{ fontSize:13, marginBottom:6 }}>Nenhuma sub-carteira nesta carteira</div>
+        <button className="mui-btn mui-btn-outlined" style={{ fontSize:12 }}>+ Criar sub-carteira</button>
+      </div>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════
+   TELA 3 — ADICIONAR ATIVO
+═══════════════════════════════ */
+const Field = ({ label, children }) => (
+  <div style={{ marginBottom:16 }}>
+    <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:.7, color:'var(--txt3)', marginBottom:6 }}>{label}</div>
+    {children}
+  </div>
+);
+
+const Screen_AddAsset = () => (
+  <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+    <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+        <span style={{ fontSize:12, color:'var(--txt3)', cursor:'pointer' }}>← Renda Fixa</span>
+        <span style={{ color:'var(--border2)' }}>›</span>
+        <span style={{ fontSize:14, fontWeight:600, color:'var(--txt)' }}>Adicionar Ativo</span>
+      </div>
+    </div>
+
+    <div style={{ flex:1, overflowY:'auto', padding:'24px', display:'flex', gap:24 }}>
+      {/* Form */}
+      <div style={{ flex:1, maxWidth:540 }}>
+        <Field label="Tipo de Ativo">
+          <div style={{ display:'flex', flexWrap:'wrap', gap:7 }}>
+            {['Renda Fixa','Ação','FII','ETF','Cripto','Fundo','Outro'].map((t,i)=>(
+              <button key={i} className="mui-btn" style={{ background:i===0?'var(--accentd)':'var(--bg3)', color:i===0?'var(--accent2)':'var(--txt3)', border:`1px solid ${i===0?'var(--accent)':'var(--border2)'}`, fontSize:12, height:28, padding:'0 12px' }}>{t}</button>
+            ))}
+          </div>
+        </Field>
+        <Field label="Subcategoria">
+          <select className="mui-select">
+            <option>Tesouro Direto</option>
+            <option>CDB</option>
+            <option>LCI / LCA</option>
+            <option>Debênture</option>
+          </select>
+        </Field>
+        <Field label="Nome / Ticker">
+          <input className="mui-input" defaultValue="Tesouro IPCA+ 2035" />
+        </Field>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+          <Field label="Valor Investido">
+            <input className="mui-input" defaultValue="R$ 90.000,00" />
+          </Field>
+          <Field label="Data de Compra">
+            <input className="mui-input" defaultValue="15/02/2024" />
+          </Field>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+          <Field label="Valor Atual (opcional)">
+            <input className="mui-input" placeholder="calculado automaticamente" />
+          </Field>
+          <Field label="Vencimento">
+            <input className="mui-input" defaultValue="15/05/2035" />
+          </Field>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+          <Field label="Indexador">
+            <select className="mui-select"><option>IPCA+</option><option>CDI%</option><option>Prefixado</option></select>
+          </Field>
+          <Field label="Taxa">
+            <input className="mui-input" defaultValue="5,75% a.a." />
+          </Field>
+        </div>
+        <Field label="Observações">
+          <textarea className="mui-input" rows={3} placeholder="Notas, estratégia, lembretes..." style={{ resize:'vertical', lineHeight:1.5 }} />
+        </Field>
+        <div style={{ display:'flex', gap:10, marginTop:8 }}>
+          <button className="mui-btn mui-btn-outlined" style={{ flex:1, height:38 }}>Cancelar</button>
+          <button className="mui-btn mui-btn-contained" style={{ flex:2, height:38, fontSize:14 }}>Salvar Ativo</button>
+        </div>
+      </div>
+
+      {/* Live preview */}
+      <div style={{ width:260, flexShrink:0 }}>
+        <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:12 }}>Pré-visualização</div>
+        <div className="mui-paper" style={{ overflow:'hidden', border:'1px solid var(--accent)44' }}>
+          <div style={{ background:'linear-gradient(135deg, var(--accentd) 0%, #0f2060 100%)', padding:'14px 16px', borderBottom:'1px solid var(--border)' }}>
+            <div style={{ fontSize:15, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Tesouro IPCA+ 2035</div>
+            <div style={{ fontSize:12, color:'var(--txt3)', marginTop:2 }}>Tesouro Direto · Renda Fixa</div>
+            <div style={{ marginTop:10, display:'flex', gap:8 }}>
+              <span className="mui-chip" style={{ background:'rgba(64,128,255,.3)', color:'var(--accent2)', border:'1px solid var(--accent)44' }}>IPCA+</span>
+              <span className="mui-chip" style={{ background:'rgba(64,128,255,.3)', color:'var(--accent2)', border:'1px solid var(--accent)44' }}>5,75% a.a.</span>
+            </div>
+          </div>
+          <div style={{ padding:'14px 16px' }}>
+            {[
+              { l:'Investido', v:'R$ 90.000' },
+              { l:'Atual', v:'R$ 90.000' },
+              { l:'Rentab. acum.', v:'+12,4%', green:true },
+              { l:'Vencimento', v:'mai/2035' },
+              { l:'Carteira', v:'Aposentadoria › Renda Fixa' },
+            ].map((r,i)=>(
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'7px 0', borderBottom: i<4?'1px solid var(--border)':'none' }}>
+                <span style={{ fontSize:12, color:'var(--txt3)' }}>{r.l}</span>
+                <span style={{ fontSize:12, color: r.green?'var(--success)':'var(--txt)', fontWeight:500 }}>{r.v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ marginTop:16, padding:'14px', background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:8, borderLeft:'3px solid var(--accent)' }}>
+          <div style={{ fontSize:12, fontWeight:600, color:'var(--txt2)', marginBottom:5 }}>Carteira de destino</div>
+          <div style={{ fontSize:13, color:'var(--txt3)' }}>
+            Aposentadoria<br />
+            <span style={{ color:'var(--accent2)' }}>└ Renda Fixa</span>
+          </div>
+          <div style={{ marginTop:8, fontSize:11, color:'var(--txt3)' }}>Este ativo contribuirá com <span style={{ color:'var(--accent2)' }}>50%</span> da carteira Renda Fixa após inclusão.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════
+   TELA 4 — PERFORMANCE
+═══════════════════════════════ */
+const ChartBox = ({ label, h=180 }) => (
+  <div style={{ height:h, background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:8, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:8 }}>
+    <div style={{ fontSize:28, opacity:.3 }}>📈</div>
+    <div style={{ fontSize:12, color:'var(--txt3)' }}>{label}</div>
+  </div>
+);
+
+const Screen_Performance = () => (
+  <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+    <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+      <span style={{ fontSize:16, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Performance</span>
+      <div style={{ display:'flex', gap:6 }}>
+        {['1M','3M','6M','1A','3A','Tudo'].map((p,i)=>(
+          <button key={i} className="mui-btn" style={{ background:i===3?'var(--accentd)':'var(--bg3)', color:i===3?'var(--accent2)':'var(--txt3)', border:`1px solid ${i===3?'var(--accent)':'var(--border2)'}`, fontSize:12, height:28, padding:'0 10px' }}>{p}</button>
+        ))}
+      </div>
+    </div>
+    <div style={{ flex:1, overflowY:'auto', padding:'22px 24px' }}>
+      <div style={{ display:'flex', gap:12, marginBottom:22 }}>
+        <StatCard label="Patrimônio atual" value="R$ 483.900" sub="↑ +R$ 8.400 este mês" />
+        <StatCard label="Rentab. 12m" value="+14,3%" sub="vs CDI +2,1 p.p." valueColor="var(--success)" />
+        <StatCard label="Melhor carteira" value="Filhos +22,1%" valueColor="var(--accent2)" />
+        <StatCard label="Pior carteira" value="Agressiva −1,4%" valueColor="var(--danger)" />
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:16 }}>
+        <div>
+          <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Evolução do Patrimônio</div>
+          <ChartBox label="Gráfico de área — patrimônio acumulado 12 meses" h={200} />
+
+          <div style={{ marginTop:18, fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Rentabilidade por Carteira</div>
+          <div className="mui-paper" style={{ overflow:'hidden' }}>
+            <table className="mui-table">
+              <thead><tr><th>Carteira</th><th style={{textAlign:'right'}}>Patrimônio</th><th style={{textAlign:'right'}}>12 meses</th><th style={{textAlign:'right'}}>vs CDI</th></tr></thead>
+              <tbody>
+                {[
+                  {n:'Aposentadoria › Renda Fixa', v:'R$ 180k', r:'+12,6%', cdi:'+0,4 p.p.', pos:true},
+                  {n:'Aposentadoria › Renda Variável', v:'R$ 132k', r:'+18,4%', cdi:'+6,2 p.p.', pos:true},
+                  {n:'Reserva de Emergência', v:'R$ 48k', r:'+10,8%', cdi:'−1,4 p.p.', pos:false},
+                  {n:'Agressiva › Internacional', v:'R$ 63k', r:'+22,1%', cdi:'+9,9 p.p.', pos:true},
+                  {n:'Agressiva › Cripto', v:'R$ 33k', r:'−8,2%', cdi:'−20,4 p.p.', pos:false},
+                ].map((r,i)=>(
+                  <tr key={i}>
+                    <td style={{ fontSize:13 }}>{r.n}</td>
+                    <td style={{ textAlign:'right', color:'var(--txt2)', fontSize:13 }}>{r.v}</td>
+                    <td style={{ textAlign:'right', fontWeight:600, color: r.pos?'var(--success)':'var(--danger)' }}>{r.r}</td>
+                    <td style={{ textAlign:'right', fontSize:12, color: r.pos?'var(--success)':'var(--danger)' }}>{r.cdi}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Alocação</div>
+          <ChartBox label="Donut por classe de ativo" h={180} />
+          <div style={{ marginTop:12 }}>
+            {[
+              { l:'Renda Fixa', p:47, c:'#4080ff' },
+              { l:'Ações', p:27, c:'#38bdf8' },
+              { l:'FIIs', p:14, c:'#f59e0b' },
+              { l:'Internacional', p:8, c:'#a78bfa' },
+              { l:'Cripto', p:4, c:'#fb923c' },
+            ].map((a,i)=>(
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+                <div style={{ width:9,height:9,borderRadius:2,background:a.c,flexShrink:0 }} />
+                <span style={{ fontSize:13, color:'var(--txt2)', flex:1 }}>{a.l}</span>
+                <div style={{ width:80, background:'var(--bg3)', borderRadius:100, height:5, overflow:'hidden' }}>
+                  <div style={{ width:`${a.p}%`, height:'100%', background:a.c }} />
+                </div>
+                <span style={{ fontSize:12, color:'var(--txt3)', width:28, textAlign:'right' }}>{a.p}%</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop:16, fontSize:11, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Destaques 12m</div>
+          {[
+            { l:'Maior rentabilidade', v:'VTI +34,2%', color:'var(--success)' },
+            { l:'Maior perda', v:'Bitcoin −12,1%', color:'var(--danger)' },
+            { l:'Maior dividendo', v:'KNRI11 R$960', color:'var(--accent2)' },
+          ].map((d,i)=>(
+            <div key={i} className="mui-paper" style={{ padding:'10px 14px', marginBottom:8 }}>
+              <div style={{ fontSize:11, color:'var(--txt3)', marginBottom:3 }}>{d.l}</div>
+              <div style={{ fontSize:14, fontWeight:600, color:d.color }}>{d.v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+/* ═══════════════════════════════
+   TELA 5 — UPLOAD DE NOTAS
+═══════════════════════════════ */
+const Screen_Upload = () => {
+  const files = [
+    { name:'nota_xp_abr2026.pdf', size:'284 KB', status:'ok' },
+    { name:'nota_clear_mar2026.pdf', size:'196 KB', status:'ok' },
+    { name:'nota_xp_mar2026.pdf', size:'312 KB', status:'warn' },
+  ];
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+      <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+        <span style={{ fontSize:16, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Importar Notas de Corretagem</span>
+        <button className="mui-btn mui-btn-outlined" style={{ fontSize:12 }}>← Voltar</button>
+      </div>
+
+      <div style={{ flex:1, overflowY:'auto', padding:'28px 32px', display:'flex', gap:28 }}>
+        {/* Left: upload area */}
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:12 }}>Enviar Notas</div>
+
+          {/* Drop zone */}
+          <div style={{ border:'2px dashed var(--accent)', borderRadius:12, background:'rgba(64,128,255,0.04)', padding:'40px 24px', display:'flex', flexDirection:'column', alignItems:'center', gap:12, marginBottom:20, cursor:'pointer' }}>
+            <div style={{ width:52, height:52, borderRadius:12, background:'var(--accentd)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:24 }}>📄</div>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ fontSize:15, fontWeight:500, color:'var(--txt)', marginBottom:4 }}>Arraste as notas aqui</div>
+              <div style={{ fontSize:13, color:'var(--txt3)' }}>ou <span style={{ color:'var(--accent2)', textDecoration:'underline', cursor:'pointer' }}>clique para selecionar</span></div>
+            </div>
+            <div style={{ fontSize:11, color:'var(--txt3)', marginTop:4 }}>PDF, PNG, JPG · até 10 arquivos · máx. 20 MB cada</div>
+          </div>
+
+          {/* Uploaded files */}
+          <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:10 }}>Arquivos ({files.length})</div>
+          <div className="mui-paper" style={{ overflow:'hidden', marginBottom:20 }}>
+            {files.map((f,i) => (
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', borderBottom: i<files.length-1?'1px solid var(--border)':'none' }}>
+                <div style={{ width:34, height:34, borderRadius:8, background:'var(--bg3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:16, flexShrink:0 }}>📄</div>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:13, fontWeight:500, color:'var(--txt)', marginBottom:2 }}>{f.name}</div>
+                  <div style={{ fontSize:11, color:'var(--txt3)' }}>{f.size}</div>
+                </div>
+                {f.status === 'warn'
+                  ? <span className="mui-chip" style={{ background:'rgba(245,158,11,.15)', color:'var(--warn)', border:'1px solid rgba(245,158,11,.3)' }}>⚠ duplicata?</span>
+                  : <span className="mui-chip" style={{ background:'rgba(34,197,94,.12)', color:'var(--success)', border:'1px solid rgba(34,197,94,.25)' }}>✓ pronto</span>
+                }
+                <button className="mui-btn mui-btn-text" style={{ fontSize:16, padding:'0 6px', color:'var(--txt3)' }}>×</button>
+              </div>
+            ))}
+          </div>
+
+          <button className="mui-btn mui-btn-contained" style={{ width:'100%', height:42, fontSize:15, justifyContent:'center', borderRadius:8, gap:8 }}>
+            ✦ Analisar com IA
+          </button>
+        </div>
+
+        {/* Right: info + corretoras */}
+        <div style={{ width:280, flexShrink:0 }}>
+          <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:12 }}>Corretoras suportadas</div>
+          <div className="mui-paper" style={{ padding:'14px 16px', marginBottom:16 }}>
+            {['XP Investimentos','Clear Corretora','Rico','BTG Pactual','Nubank','Inter','Toro','Avenue'].map((c,i)=>(
+              <div key={i} style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 0', borderBottom: i<7?'1px solid var(--border)':'none' }}>
+                <span style={{ color:'var(--success)', fontSize:12 }}>✓</span>
+                <span style={{ fontSize:13, color:'var(--txt2)' }}>{c}</span>
+              </div>
+            ))}
+            <div style={{ marginTop:8, fontSize:12, color:'var(--txt3)' }}>+ formato genérico B3</div>
+          </div>
+
+          <div style={{ background:'var(--bg2)', border:'1px solid var(--border)', borderLeft:'3px solid var(--accent)', borderRadius:8, padding:'14px 16px' }}>
+            <div style={{ fontSize:13, fontWeight:600, color:'var(--txt2)', marginBottom:6 }}>Como funciona</div>
+            <div style={{ fontSize:12, color:'var(--txt3)', lineHeight:1.7 }}>
+              1. Envie as notas em PDF<br/>
+              2. A IA extrai operações automaticamente<br/>
+              3. Você revisa e confirma o mapeamento<br/>
+              4. As posições são atualizadas
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════
+   TELA 6 — PROCESSANDO (IA)
+═══════════════════════════════ */
+const Screen_Processing = () => {
+  const steps = [
+    { label:'Lendo PDFs e extraindo texto', done:true },
+    { label:'Identificando operações e ativos', done:true },
+    { label:'Cruzando com suas carteiras', done:true },
+    { label:'Detectando conflitos e duplicatas', active:true },
+    { label:'Gerando resumo de alterações', pending:true },
+  ];
+  const found = [
+    { ticker:'ITSA4', op:'Compra', qt:'100', preco:'R$10,42', data:'15/04', conf:98 },
+    { ticker:'Tesouro IPCA+ 2035', op:'Compra', qt:'—', preco:'R$5.000', data:'15/04', conf:95 },
+    { ticker:'KNRI11', op:'Compra', qt:'20', preco:'R$142,30', data:'16/04', conf:92 },
+    { ticker:'VALE3', op:'Venda', qt:'50', preco:'R$68,10', data:'17/04', conf:87 },
+    { ticker:'MGLU3', op:'Compra', qt:'200', preco:'R$2,85', data:'17/04', conf:61 },
+  ];
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+      <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', flexShrink:0 }}>
+        <span style={{ fontSize:16, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Analisando notas…</span>
+      </div>
+
+      <div style={{ flex:1, overflowY:'auto', padding:'28px 32px', display:'flex', gap:28 }}>
+        {/* Left: steps */}
+        <div style={{ width:280, flexShrink:0 }}>
+          <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:14 }}>Progresso</div>
+          <div className="mui-paper" style={{ padding:'16px' }}>
+            {steps.map((s,i) => (
+              <div key={i} style={{ display:'flex', gap:12, alignItems:'flex-start', marginBottom: i<steps.length-1?16:0 }}>
+                <div style={{ width:22, height:22, borderRadius:'50%', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:11, fontWeight:700,
+                  background: s.done?'var(--success)' : s.active?'var(--accent)' : 'var(--bg4)',
+                  color: s.done||s.active?'#fff':'var(--txt3)',
+                  border: s.active?'2px solid var(--accent2)':'2px solid transparent',
+                  boxShadow: s.active?'0 0 0 3px rgba(64,128,255,.2)':'none',
+                }}>
+                  {s.done ? '✓' : i+1}
+                </div>
+                <div style={{ paddingTop:2 }}>
+                  <div style={{ fontSize:13, color: s.done?'var(--txt2)' : s.active?'var(--txt)':'var(--txt3)', fontWeight: s.active?500:400 }}>{s.label}</div>
+                  {s.active && <div style={{ fontSize:11, color:'var(--accent2)', marginTop:3 }}>em andamento…</div>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop:16, padding:'12px 14px', background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:8 }}>
+            <div style={{ fontSize:11, color:'var(--txt3)', marginBottom:4 }}>3 arquivos · 17 páginas</div>
+            <div style={{ background:'var(--bg4)', borderRadius:100, height:6, overflow:'hidden' }}>
+              <div style={{ width:'72%', height:'100%', background:'var(--accent)', borderRadius:100, boxShadow:'0 0 8px rgba(64,128,255,.6)' }} />
+            </div>
+            <div style={{ fontSize:11, color:'var(--accent2)', marginTop:5 }}>72% concluído</div>
+          </div>
+        </div>
+
+        {/* Right: live results */}
+        <div style={{ flex:1 }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
+            <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)' }}>Operações identificadas até agora</div>
+            <span className="mui-chip" style={{ background:'var(--accentd)', color:'var(--accent2)', border:'1px solid var(--border2)' }}>{found.length} encontradas</span>
+          </div>
+
+          <div className="mui-paper" style={{ overflow:'hidden' }}>
+            <table className="mui-table">
+              <thead><tr>
+                <th>Ativo</th><th>Operação</th><th>Qtd.</th><th>Preço</th><th>Data</th><th>Confiança</th>
+              </tr></thead>
+              <tbody>
+                {found.map((r,i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight:500 }}>{r.ticker}</td>
+                    <td>
+                      <span className="mui-chip" style={{ background: r.op==='Compra'?'rgba(34,197,94,.12)':'rgba(240,71,71,.12)', color: r.op==='Compra'?'var(--success)':'var(--danger)', border:`1px solid ${r.op==='Compra'?'rgba(34,197,94,.25)':'rgba(240,71,71,.25)'}` }}>{r.op}</span>
+                    </td>
+                    <td style={{ color:'var(--txt2)' }}>{r.qt}</td>
+                    <td style={{ color:'var(--txt2)' }}>{r.preco}</td>
+                    <td style={{ color:'var(--txt3)', fontSize:12 }}>{r.data}</td>
+                    <td>
+                      <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                        <div style={{ width:60, background:'var(--bg4)', borderRadius:100, height:5, overflow:'hidden' }}>
+                          <div style={{ width:`${r.conf}%`, height:'100%', background: r.conf>=90?'var(--success)':r.conf>=70?'var(--warn)':'var(--danger)', borderRadius:100 }} />
+                        </div>
+                        <span style={{ fontSize:11, color: r.conf>=90?'var(--success)':r.conf>=70?'var(--warn)':'var(--danger)', fontWeight:500 }}>{r.conf}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ marginTop:12, padding:'10px 14px', background:'rgba(64,128,255,.06)', border:'1px solid var(--border2)', borderRadius:8, fontSize:12, color:'var(--txt3)' }}>
+            ✦ A IA está cruzando os ativos identificados com as carteiras existentes e buscando mapeamentos automáticos…
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════
+   TELA 7 — REVISÃO DE OPERAÇÕES
+═══════════════════════════════ */
+const Screen_Review = () => {
+  const ops = [
+    { ticker:'ITSA4',           op:'Compra', qt:'100', preco:'R$10,42', data:'15/04', cart:'Aposentadoria › Renda Variável', conf:98, status:'ok' },
+    { ticker:'Tesouro IPCA+',   op:'Compra', qt:'—',   preco:'R$5.000', data:'15/04', cart:'Aposentadoria › Renda Fixa', conf:95, status:'ok' },
+    { ticker:'KNRI11',          op:'Compra', qt:'20',  preco:'R$142,30',data:'16/04', cart:'Aposentadoria › Renda Variável', conf:92, status:'ok' },
+    { ticker:'VALE3',           op:'Venda',  qt:'50',  preco:'R$68,10', data:'17/04', cart:'Aposentadoria › Renda Variável', conf:87, status:'ok' },
+    { ticker:'MGLU3',           op:'Compra', qt:'200', preco:'R$2,85',  data:'17/04', cart:'— não encontrado —', conf:61, status:'conflict' },
+    { ticker:'PETR4',           op:'Compra', qt:'150', preco:'R$38,20', data:'17/04', cart:'Aposentadoria › Renda Variável', conf:55, status:'warn' },
+  ];
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+      <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+          <span style={{ fontSize:16, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Revisar Operações Extraídas</span>
+          <span className="mui-chip" style={{ background:'var(--bg3)', color:'var(--txt3)', border:'1px solid var(--border2)', fontSize:12 }}>6 operações</span>
+        </div>
+        <div style={{ display:'flex', gap:8 }}>
+          <button className="mui-btn mui-btn-outlined">← Reenviar notas</button>
+          <button className="mui-btn mui-btn-contained" style={{ gap:6 }}>Confirmar e Aplicar →</button>
+        </div>
+      </div>
+
+      {/* Summary bar */}
+      <div style={{ background:'var(--bg1)', borderBottom:'1px solid var(--border)', padding:'8px 24px', display:'flex', gap:20 }}>
+        {[
+          { label:'Ok / mapeados', val:'4', color:'var(--success)' },
+          { label:'Baixa confiança', val:'1', color:'var(--warn)' },
+          { label:'Sem carteira', val:'1', color:'var(--danger)' },
+        ].map((s,i) => (
+          <div key={i} style={{ display:'flex', alignItems:'center', gap:6 }}>
+            <div style={{ width:8, height:8, borderRadius:'50%', background:s.color }} />
+            <span style={{ fontSize:12, color:'var(--txt3)' }}>{s.label}:</span>
+            <span style={{ fontSize:13, fontWeight:600, color:s.color }}>{s.val}</span>
+          </div>
+        ))}
+        <div style={{ marginLeft:'auto', fontSize:12, color:'var(--txt3)' }}>Revise e ajuste o mapeamento antes de aplicar</div>
+      </div>
+
+      <div style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
+        <div className="mui-paper" style={{ overflow:'hidden' }}>
+          <table className="mui-table">
+            <thead><tr>
+              <th style={{width:24}}></th>
+              <th>Ativo</th><th>Op.</th><th>Qtd.</th><th>Preço unit.</th><th>Data</th>
+              <th>Carteira de destino</th>
+              <th>Confiança</th><th></th>
+            </tr></thead>
+            <tbody>
+              {ops.map((r,i) => {
+                const isConflict = r.status==='conflict';
+                const isWarn = r.status==='warn';
+                const rowBg = isConflict?'rgba(240,71,71,.06)':isWarn?'rgba(245,158,11,.04)':'transparent';
+                return (
+                  <tr key={i} style={{ background:rowBg }}>
+                    <td>
+                      {isConflict && <span style={{ color:'var(--danger)', fontSize:15 }}>⚠</span>}
+                      {isWarn && <span style={{ color:'var(--warn)', fontSize:15 }}>!</span>}
+                      {!isConflict&&!isWarn && <span style={{ color:'var(--success)', fontSize:13 }}>✓</span>}
+                    </td>
+                    <td style={{ fontWeight:500 }}>{r.ticker}</td>
+                    <td>
+                      <span className="mui-chip" style={{ background: r.op==='Compra'?'rgba(34,197,94,.12)':'rgba(240,71,71,.12)', color: r.op==='Compra'?'var(--success)':'var(--danger)', border:'none' }}>{r.op}</span>
+                    </td>
+                    <td style={{ color:'var(--txt2)' }}>{r.qt}</td>
+                    <td style={{ color:'var(--txt2)' }}>{r.preco}</td>
+                    <td style={{ color:'var(--txt3)', fontSize:12 }}>{r.data}</td>
+                    <td>
+                      {isConflict
+                        ? <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                            <span style={{ fontSize:12, color:'var(--danger)' }}>Não identificado</span>
+                            <button className="mui-btn" style={{ background:'rgba(240,71,71,.12)', color:'var(--danger)', border:'1px solid rgba(240,71,71,.25)', fontSize:11, height:24, padding:'0 10px' }}>Mapear</button>
+                          </div>
+                        : <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                            <span style={{ fontSize:12, color: isWarn?'var(--warn)':'var(--txt2)' }}>{r.cart}</span>
+                            <button className="mui-btn mui-btn-text" style={{ fontSize:11, padding:'0 6px', height:22 }}>editar</button>
+                          </div>
+                      }
+                    </td>
+                    <td>
+                      <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+                        <div style={{ width:50, background:'var(--bg4)', borderRadius:100, height:4, overflow:'hidden' }}>
+                          <div style={{ width:`${r.conf}%`, height:'100%', background: r.conf>=90?'var(--success)':r.conf>=70?'var(--warn)':'var(--danger)' }} />
+                        </div>
+                        <span style={{ fontSize:11, color:'var(--txt3)' }}>{r.conf}%</span>
+                      </div>
+                    </td>
+                    <td>
+                      <button className="mui-btn mui-btn-text" style={{ fontSize:12, padding:'0 6px', color:'var(--txt3)' }}>···</button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Conflict callout */}
+        <div style={{ marginTop:14, padding:'14px 16px', background:'rgba(240,71,71,.07)', border:'1px solid rgba(240,71,71,.25)', borderRadius:8, display:'flex', gap:12, alignItems:'flex-start' }}>
+          <span style={{ fontSize:18, flexShrink:0 }}>⚠</span>
+          <div>
+            <div style={{ fontSize:13, fontWeight:600, color:'var(--danger)', marginBottom:4 }}>MGLU3 — sem carteira de destino</div>
+            <div style={{ fontSize:12, color:'var(--txt3)', lineHeight:1.6 }}>
+              A IA não encontrou este ativo em nenhuma carteira existente. Você pode criar uma nova carteira, mapear para uma existente ou ignorar esta operação.
+            </div>
+            <div style={{ display:'flex', gap:8, marginTop:10 }}>
+              <button className="mui-btn" style={{ background:'rgba(240,71,71,.15)', color:'var(--danger)', border:'1px solid rgba(240,71,71,.3)', fontSize:12, height:28 }}>Mapear para carteira existente</button>
+              <button className="mui-btn" style={{ background:'var(--bg3)', color:'var(--txt3)', border:'1px solid var(--border2)', fontSize:12, height:28 }}>Criar nova carteira</button>
+              <button className="mui-btn" style={{ background:'transparent', color:'var(--txt3)', border:'none', fontSize:12, height:28 }}>Ignorar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════
+   TELA 8 — CONFIRMAÇÃO FINAL
+═══════════════════════════════ */
+const Screen_Confirm = () => {
+  const changes = [
+    { cart:'Aposentadoria › Renda Variável', items:[
+        { ticker:'ITSA4', op:'Compra', delta:'+100 cotas', newPos:'100 cotas · R$10,42', color:'var(--success)' },
+        { ticker:'KNRI11', op:'Compra', delta:'+20 cotas', newPos:'120 cotas · R$142,30', color:'var(--success)' },
+        { ticker:'VALE3', op:'Venda', delta:'−50 cotas', newPos:'200 cotas · PM R$62,10', color:'var(--danger)' },
+        { ticker:'PETR4', op:'Compra', delta:'+150 cotas', newPos:'150 cotas · R$38,20', color:'var(--success)' },
+    ]},
+    { cart:'Aposentadoria › Renda Fixa', items:[
+        { ticker:'Tesouro IPCA+ 2035', op:'Compra', delta:'+R$5.000', newPos:'R$95.000 total', color:'var(--success)' },
+    ]},
+  ];
+  return (
+    <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', background:'var(--bg0)' }}>
+      <div style={{ height:50, borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', padding:'0 24px', justifyContent:'space-between', flexShrink:0 }}>
+        <span style={{ fontSize:16, fontWeight:600, color:'var(--txt)', letterSpacing:-.2 }}>Confirmar Alterações</span>
+        <div style={{ display:'flex', gap:8 }}>
+          <button className="mui-btn mui-btn-outlined">← Revisar</button>
+          <button className="mui-btn mui-btn-contained" style={{ background:'var(--success)', boxShadow:'0 2px 8px rgba(34,197,94,.3)', gap:6 }}>✓ Aplicar Tudo</button>
+        </div>
+      </div>
+
+      <div style={{ flex:1, overflowY:'auto', padding:'24px 32px', display:'flex', gap:24 }}>
+        {/* Left: changes by portfolio */}
+        <div style={{ flex:1 }}>
+          <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:14 }}>Alterações por Carteira</div>
+          {changes.map((g,gi) => (
+            <div key={gi} className="mui-paper" style={{ marginBottom:14, overflow:'hidden' }}>
+              <div style={{ padding:'10px 16px', borderBottom:'1px solid var(--border)', background:'var(--bg3)', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                <span style={{ fontSize:13, fontWeight:600, color:'var(--txt)' }}>{g.cart}</span>
+                <span className="mui-chip" style={{ background:'var(--bg4)', color:'var(--txt3)', border:'1px solid var(--border2)' }}>{g.items.length} ops</span>
+              </div>
+              <table className="mui-table">
+                <thead><tr>
+                  <th>Ativo</th><th>Operação</th><th>Variação</th><th>Nova posição</th>
+                </tr></thead>
+                <tbody>
+                  {g.items.map((r,i)=>(
+                    <tr key={i}>
+                      <td style={{ fontWeight:500 }}>{r.ticker}</td>
+                      <td><span className="mui-chip" style={{ background: r.op==='Compra'?'rgba(34,197,94,.12)':'rgba(240,71,71,.12)', color: r.op==='Compra'?'var(--success)':'var(--danger)', border:'none' }}>{r.op}</span></td>
+                      <td style={{ fontWeight:600, color:r.color }}>{r.delta}</td>
+                      <td style={{ fontSize:12, color:'var(--txt3)' }}>{r.newPos}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+
+          {/* Ignored */}
+          <div style={{ padding:'12px 16px', background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:8, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div>
+              <div style={{ fontSize:13, color:'var(--txt2)' }}>MGLU3 — ignorada</div>
+              <div style={{ fontSize:11, color:'var(--txt3)', marginTop:2 }}>Operação sem carteira de destino definida</div>
+            </div>
+            <button className="mui-btn mui-btn-text" style={{ fontSize:12 }}>desfazer</button>
+          </div>
+        </div>
+
+        {/* Right: summary */}
+        <div style={{ width:260, flexShrink:0 }}>
+          <div style={{ fontSize:12, fontWeight:600, textTransform:'uppercase', letterSpacing:1, color:'var(--txt3)', marginBottom:12 }}>Resumo</div>
+
+          <div className="mui-paper" style={{ padding:'16px', marginBottom:14 }}>
+            {[
+              { l:'Operações aplicadas', v:'5 de 6' },
+              { l:'Compras', v:'4' },
+              { l:'Vendas', v:'1' },
+              { l:'Carteiras afetadas', v:'2' },
+              { l:'Notas processadas', v:'3 arquivos' },
+            ].map((r,i)=>(
+              <div key={i} style={{ display:'flex', justifyContent:'space-between', padding:'7px 0', borderBottom: i<4?'1px solid var(--border)':'none' }}>
+                <span style={{ fontSize:12, color:'var(--txt3)' }}>{r.l}</span>
+                <span style={{ fontSize:13, fontWeight:500, color:'var(--txt)' }}>{r.v}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ padding:'14px', background:'rgba(34,197,94,.07)', border:'1px solid rgba(34,197,94,.2)', borderRadius:8, textAlign:'center' }}>
+            <div style={{ fontSize:13, fontWeight:600, color:'var(--success)', marginBottom:4 }}>Pronto para aplicar</div>
+            <div style={{ fontSize:12, color:'var(--txt3)', lineHeight:1.6 }}>As posições serão atualizadas e você poderá desfazer nos próximos 24h pelo histórico.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ═══════════════════════════════
+   USER STORY CARD
+═══════════════════════════════ */
+const StoryCard = ({ epic, stories, acceptance }) => (
+  <div style={{
+    width: 300, background: '#faf8f2', border: '1.5px solid #e0d8c8',
+    borderRadius: 10, fontFamily: "'Jost', sans-serif",
+    boxShadow: '3px 3px 0 rgba(0,0,0,0.08)',
+    display: 'flex', flexDirection: 'column', alignSelf: 'flex-start',
+    overflow: 'hidden',
+  }}>
+    {/* Epic header */}
+    <div style={{ background: '#1a2744', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div style={{ width: 7, height: 7, borderRadius: 2, background: '#4080ff', flexShrink: 0 }} />
+      <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1.2, color: '#7aaeff' }}>{epic}</span>
+    </div>
+
+    {/* Stories */}
+    <div style={{ padding: '14px 16px', borderBottom: stories && acceptance ? '1px dashed #ddd' : 'none' }}>
+      {stories.map((s, i) => (
+        <div key={i} style={{ marginBottom: i < stories.length - 1 ? 14 : 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .8, color: '#1a2744', marginBottom: 5, opacity: .5 }}>História {i + 1}</div>
+          <div style={{ fontSize: 13, color: '#2a3a5a', lineHeight: 1.65 }}>
+            <span style={{ display: 'block' }}><strong style={{ color: '#1a2744' }}>Como</strong> {s.como},</span>
+            <span style={{ display: 'block' }}><strong style={{ color: '#1a2744' }}>quero</strong> {s.quero},</span>
+            <span style={{ display: 'block' }}><strong style={{ color: '#1a2744' }}>para</strong> {s.para}.</span>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    {/* Acceptance criteria */}
+    {acceptance && (
+      <div style={{ padding: '12px 16px', background: '#f2efe8' }}>
+        <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1, color: '#888', marginBottom: 8 }}>Critérios de aceite</div>
+        {acceptance.map((a, i) => (
+          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: i < acceptance.length - 1 ? 5 : 0 }}>
+            <span style={{ color: '#4080ff', fontSize: 12, flexShrink: 0, marginTop: 1 }}>✓</span>
+            <span style={{ fontSize: 12, color: '#445', lineHeight: 1.5 }}>{a}</span>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
+/* ═══════════════════════════════
+   MAIN
+═══════════════════════════════ */
+const App = () => {
+  const [tweaks, set] = useTweaks(TWEAK_DEFAULTS);
+  return (<>
+  <DynamicStyles palette={tweaks.palette} surface={tweaks.surface} density={tweaks.density} />
+  <TweaksPanel>
+    <TweakSection label="Paleta de cor">
+      <TweakRadio id="palette" value={tweaks.palette} onChange={v => set('palette', v)}
+        options={[
+          { value:'ocean',   label:'Ocean Blue' },
+          { value:'emerald', label:'Emerald' },
+          { value:'violet',  label:'Violet' },
+          { value:'amber',   label:'Amber' },
+        ]}
+      />
+    </TweakSection>
+    <TweakSection label="Estilo de superfície">
+      <TweakRadio id="surface" value={tweaks.surface} onChange={v => set('surface', v)}
+        options={[
+          { value:'flat',     label:'Flat — limpo' },
+          { value:'glass',    label:'Glass — translúcido' },
+          { value:'outlined', label:'Outlined — definido' },
+        ]}
+      />
+    </TweakSection>
+    <TweakSection label="Densidade">
+      <TweakRadio id="density" value={tweaks.density} onChange={v => set('density', v)}
+        options={[
+          { value:'compact',     label:'Compacto' },
+          { value:'comfortable', label:'Confortável' },
+          { value:'spacious',    label:'Espaçoso' },
+        ]}
+      />
+    </TweakSection>
+  </TweaksPanel>
+  <DesignCanvas>
+    <DCSection title="Tela 1 — Dashboard" subtitle="Visão consolidada de todas as carteiras raiz e últimas movimentações.">
+      <DCArtboard label="Dashboard / Visão Geral" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a" />
+          <Screen_Dashboard />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Visão geral" stories={[
+        { como:'investidor', quero:'ver meu patrimônio total consolidado em uma tela', para:'entender minha situação financeira de relance sem navegar em cada carteira' },
+        { como:'investidor', quero:'acompanhar a rentabilidade de cada carteira raiz', para:'comparar o desempenho entre diferentes estratégias de alocação' },
+        { como:'investidor', quero:'ver as últimas movimentações registradas', para:'confirmar que as operações foram salvas corretamente' },
+      ]} acceptance={[
+        'Patrimônio total atualizado em tempo real',
+        'Variação percentual do mês visível no header',
+        'Últimas 5+ movimentações listadas por data',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Tela 2 — Carteira em detalhe" subtitle="Navegação em árvore: ao clicar em qualquer nível da sidebar, o painel direito mostra seus filhos (sub-carteiras) e ativos.">
+      <DCArtboard label="Aposentadoria › Renda Fixa" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a1" />
+          <Screen_Portfolio />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Hierarquia de carteiras" stories={[
+        { como:'investidor', quero:'organizar meus ativos em carteiras aninhadas sem limite de profundidade', para:'refletir exatamente minha estratégia de alocação, como faço em planilhas' },
+        { como:'investidor', quero:'navegar pela árvore de carteiras clicando na sidebar', para:'acessar rapidamente qualquer sub-carteira ou ativo sem perder o contexto' },
+        { como:'investidor', quero:'ver o peso e valor de cada ativo dentro da carteira', para:'identificar concentrações e desequilíbrios de alocação' },
+      ]} acceptance={[
+        'Aninhamento ilimitado de sub-carteiras',
+        'Breadcrumb mostra caminho completo na árvore',
+        'Peso de cada ativo calculado em relação à carteira pai',
+        'Botão "Nova sub-carteira" disponível em qualquer nível',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Tela 3 — Adicionar Ativo" subtitle="Formulário contextual. Pré-visualização do card do ativo e caminho na árvore em tempo real.">
+      <DCArtboard label="+ Ativo em Renda Fixa" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a1" />
+          <Screen_AddAsset />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Gestão de ativos" stories={[
+        { como:'investidor', quero:'registrar um novo ativo escolhendo seu tipo e preenchendo os campos específicos', para:'manter o controle preciso de cada posição com os dados relevantes ao tipo' },
+        { como:'investidor', quero:'ver uma pré-visualização do card do ativo enquanto preencho o formulário', para:'confirmar os dados antes de salvar e entender como ele aparecerá na carteira' },
+      ]} acceptance={[
+        'Campos dinâmicos por tipo (Renda Fixa, Ação, FII, ETF, Cripto…)',
+        'Pré-visualização atualiza em tempo real',
+        'Carteira de destino herdada do contexto de navegação',
+        'Validação de campos obrigatórios antes de salvar',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Tela 4 — Performance" subtitle="Evolução patrimonial, comparativo entre carteiras e alocação por classe.">
+      <DCArtboard label="Performance (12 meses)" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a" />
+          <Screen_Performance />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Análise de performance" stories={[
+        { como:'investidor', quero:'ver a evolução do meu patrimônio ao longo do tempo', para:'entender a trajetória dos meus investimentos e identificar períodos de alta e baixa' },
+        { como:'investidor', quero:'comparar a rentabilidade de cada carteira com o CDI', para:'avaliar se estou superando o benchmark e onde posso melhorar a alocação' },
+      ]} acceptance={[
+        'Filtros de período: 1M, 3M, 6M, 1A, 3A, Tudo',
+        'Benchmark CDI sempre visível para comparação',
+        'Gráfico de área com patrimônio acumulado',
+        'Ranking de carteiras por rentabilidade no período',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Fluxo IA — Tela 5: Upload de Notas" subtitle="Entrada do fluxo: drag & drop de PDFs das notas de corretagem. Suporte a múltiplas corretoras.">
+      <DCArtboard label="Upload de Notas de Corretagem" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a" />
+          <Screen_Upload />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Importação via IA" stories={[
+        { como:'investidor', quero:'enviar minhas notas de corretagem em PDF', para:'não precisar registrar operações manualmente uma a uma' },
+        { como:'investidor', quero:'enviar notas de múltiplas corretoras de uma só vez', para:'consolidar todas as operações do mês em uma única importação' },
+      ]} acceptance={[
+        'Suporte a PDF, PNG e JPG',
+        'Múltiplos arquivos em uma importação',
+        'Detecção de duplicatas antes de processar',
+        'Corretoras suportadas listadas claramente',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Fluxo IA — Tela 6: Processando" subtitle="IA lendo os PDFs em tempo real. Steps de progresso + preview ao vivo das operações encontradas com score de confiança.">
+      <DCArtboard label="Análise em andamento" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a" />
+          <Screen_Processing />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Extração com IA" stories={[
+        { como:'investidor', quero:'acompanhar em tempo real o que a IA está identificando nas notas', para:'ter transparência sobre o processo e antecipar possíveis problemas' },
+        { como:'investidor', quero:'ver um score de confiança para cada operação extraída', para:'saber quais dados precisarei revisar com mais atenção' },
+      ]} acceptance={[
+        'Steps de progresso com status visual claro',
+        'Operações aparecem conforme são extraídas',
+        'Score de confiança 0–100% por operação',
+        'Baixa confiança (<70%) destacada visualmente',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Fluxo IA — Tela 7: Revisão" subtitle="Usuário revisa o mapeamento ativo → carteira. Conflitos e baixa confiança são destacados. Ajuste inline antes de aplicar.">
+      <DCArtboard label="Revisar Operações Extraídas" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a" />
+          <Screen_Review />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Revisão e mapeamento" stories={[
+        { como:'investidor', quero:'revisar e corrigir o mapeamento ativo → carteira sugerido pela IA', para:'ter controle total sobre onde cada operação será registrada antes de aplicar' },
+        { como:'investidor', quero:'ser alertado quando um ativo não for encontrado em nenhuma carteira', para:'decidir conscientemente se crio uma nova carteira ou ignoro a operação' },
+      ]} acceptance={[
+        'Conflitos destacados em vermelho com ação clara',
+        'Mapeamento editável inline sem sair da tela',
+        'Filtro por status: Ok / Conflito / Baixa confiança',
+        'Possível ignorar operações individualmente',
+      ]} />
+    </DCSection>
+
+    <DCSection title="Fluxo IA — Tela 8: Confirmação" subtitle="Resumo final agrupado por carteira. Operações ignoradas ficam visíveis. Desfazer disponível por 24h após aplicação.">
+      <DCArtboard label="Confirmar e Aplicar Alterações" width={1200} height={740}>
+        <BrowserShell>
+          <Sidebar activeId="a" />
+          <Screen_Confirm />
+        </BrowserShell>
+      </DCArtboard>
+      <StoryCard epic="Confirmação e desfazer" stories={[
+        { como:'investidor', quero:'ver um resumo claro de todas as alterações agrupadas por carteira antes de confirmar', para:'ter uma última oportunidade de revisar sem o risco de aplicar dados incorretos' },
+        { como:'investidor', quero:'poder desfazer uma importação após aplicá-la', para:'corrigir erros sem precisar ajustar cada ativo manualmente' },
+      ]} acceptance={[
+        'Resumo agrupado por carteira de destino',
+        'Operações ignoradas visíveis com opção de incluir',
+        'Desfazer disponível por 24h no histórico',
+        'Confirmação exige ação explícita do usuário',
+      ]} />
+    </DCSection>
+  </DesignCanvas>
+  </>);
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+<div id="root"></div>
+</body>
+</html>
