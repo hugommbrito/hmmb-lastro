@@ -48,8 +48,11 @@ Cada entrada traz a decisão e as consequências no corpo; o contexto está nos 
 - Status: aceito
 - Origem: sessão de planejamento com o Hugo (respostas às decisões D1–D16 do handoff e revisões do plano).
 - Substitui: Handoff §3 "Infra" (Hetzner + Vercel + R2) e planejamento v2 §4.
+- Atualização: 2026-09-25, após o inventário F0-01 (`docs/infra.md`), aprovada pelo Hugo.
 
 Projeto Coolify "lastro" com `lastro-web` (estático), `lastro-api`, `lastro-jobs` (mesma imagem da API com `HTTP_ENABLED=false`), Postgres 16 e Redis 7 como serviços; na F2 entra `lastro-worker`. Backups pelo agendador do Coolify para OCI Object Storage. Consequências: custo zero adicional; host compartilhado (R7); imagens arm64; base `node:24-slim` (glibc) por causa do argon2 nativo (R19).
+
+Complementos do inventário F0-01 (host `VM.Standard.A1.Flex`, 2 OCPU / 12 GB, arm64, conta Pay As You Go): (a) todo serviço do Lastro tem limite de memória no Coolify, conforme `docs/infra.md` §5.1 (Postgres 1024 MiB, Redis 384 MiB, api e jobs 512 MiB cada, web 64 MiB, worker 1024 MiB na F2), porque o host não tem swap e os demais containers não têm limite; (b) o Postgres usa a imagem Debian `postgres:16`, não a Alpine padrão do Coolify, pela collation glibc para ordenação em português e pela paridade com o CI (ADR-026). Operação do host, aprovada na mesma data e ainda por implementar: auto-update do Coolify desligado, com atualização manual mensal junto com o Renovate (ADR-006); swapfile de 2 a 4 GB com `vm.swappiness=10`; limpeza automática do Docker ligada.
 
 ## ADR-003 — Mesma origem para app e API
 

@@ -104,7 +104,7 @@ PostgreSQL 16 com `ltree`, `pgcrypto` e `pg_trgm`. Redis 7 para o BullMQ (`noevi
 
 ### Infra e hospedagem
 
-Um servidor OCI (Toronto) já operado por Coolify. Projeto "lastro" com `lastro-web` (estático), `lastro-api`, `lastro-jobs` (mesma imagem da API, `HTTP_ENABLED=false`), Postgres e Redis como serviços; `lastro-worker` na F2. App e API na mesma origem: `lastro.hmmb.app.br` e `lastro.hmmb.app.br/api` (sem CORS; cookies `SameSite=Lax`). Backups diários para OCI Object Storage (S3). Cada serviço só redeploya quando a sua pasta muda (Watch Paths). Custo fixo adicional: zero.
+Um servidor OCI (Toronto) já operado por Coolify: `VM.Standard.A1.Flex` arm64, 2 OCPU / 12 GB, inventariado em `docs/infra.md` (F0-01). Projeto "lastro" com `lastro-web` (estático), `lastro-api`, `lastro-jobs` (mesma imagem da API, `HTTP_ENABLED=false`), Postgres (`postgres:16`, imagem Debian) e Redis como serviços, cada um com limite de memória; `lastro-worker` na F2. App e API na mesma origem: `lastro.hmmb.app.br` e `lastro.hmmb.app.br/api` (sem CORS; cookies `SameSite=Lax`). Backups diários para OCI Object Storage (S3). Cada serviço só redeploya quando a sua pasta muda (Watch Paths). Custo fixo adicional: zero.
 
 ### Repositório
 

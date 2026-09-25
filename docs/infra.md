@@ -7,7 +7,7 @@
 - VM `VM.Standard.A1.Flex` (Ampere, arm64) em Toronto com 2 OCPU, 12 GB de RAM (11,65 GiB úteis), sem swap e 50 GB de boot volume, dos quais 30 GB estão livres. Conta Pay As You Go com custo de R$ 0,00; a VM usa metade da cota gratuita de A1 (4 OCPU / 24 GB).
 - Hoje o host usa 1,5 GiB de RAM (9,7 GiB disponíveis) e tem carga média de 0,1 a 0,2. A folga comporta o Lastro inteiro, incluindo o worker da F2.
 - **Decisão: arm64.** As imagens são construídas nativamente no host pelo Coolify. Não é preciso build multi-arch. Ver §5.
-- Nenhum ADR é contradito. Os ADR-002, 003 e 005 ficam como estão. Há duas propostas de complemento na §6, que esperam aprovação.
+- Nenhum ADR é contradito. O ADR-002 ganhou dois complementos aprovados em 25/09 (limites de memória por serviço e `postgres:16` Debian, §6); ADR-003 e ADR-005 ficam como estão.
 - Riscos confirmados: painel do Coolify (8000, HTTP) e WebSocket (6001–6002) abertos na Security List; auto-update do Coolify ligado (subiu de 4.3.21 para 4.3.23 entre as duas coletas). O dashboard do Traefik (8080) está bloqueado pela OCI. Ver §4.
 - Nada do que o Lastro precisa existe ainda no host: sem DNS, sem acesso do GitHub App ao repositório, sem bucket e sem destino S3 no Coolify. A lista de pré-requisitos da F0-02 está na §8.
 
@@ -75,7 +75,7 @@ Firewall local: o `ufw` está inativo. A chain INPUT do iptables aceita 22, 80, 
 
 ## 4. Riscos do host
 
-| # | Risco | Evidência | Mitigação proposta | Quando |
+| # | Risco | Evidência | Mitigação | Quando |
 |---|---|---|---|---|
 | R-I1 | **Confirmado.** Painel do Coolify em HTTP puro (8000) e WebSocket do painel (6001–6002) abertos à internet. Login e sessão do painel trafegam sem TLS, e quem controla o painel controla todos os containers, inclusive o Postgres do Lastro. O dashboard do Traefik (8080) está publicado pelo Docker, mas a Security List não o libera. | Security List: `0.0.0.0/0` → 8000 e 6001–6002 (§7.2). | Definir um domínio para a instância do Coolify (Settings → Instance domain, ex.: `coolify.hmmb.app.br`, com registro A e TLS pelo Traefik); confirmar que painel e terminal funcionam pela 443; então remover 8000 e 6001–6002 da Security List (ou restringi-las ao seu IP). Manter a 8080 fora da lista. | Antes da F0-21 (primeiro dado real). Mudança sua no console e no painel. |
 | R-I2 | ~~*Idle reclaim* do Always Free.~~ **Descartado.** A conta é Pay As You Go, que não está sujeita à recuperação por ociosidade. O custo do último mês é R$ 0,00. | Billing → plan type PAYG. | Como PAYG cobra o que passar da cota gratuita, criar um Budget na OCI com alerta em US$ 1 para pegar qualquer cobrança acidental (Object Storage acima de 20 GB, tráfego de saída acima de 10 TB, VM fora da cota). | Quando puder; não bloqueia. |
@@ -84,6 +84,8 @@ Firewall local: o `ufw` está inativo. A chain INPUT do iptables aceita 22, 80, 
 | R-I5 | Disco consumido por imagens antigas e build cache. | 8,8 GB recuperáveis hoje. | Conferir Servers → Docker Cleanup no painel (não coberto na rodada de 25/09) e ligar a limpeza automática com limiar de ~80%. O Lastro inteiro cabe em ~6 GB (§5.2). | F0-02. |
 | R-I6 | **Confirmado.** Auto-update do Coolify ligado: entre o SSH de 24/09 (4.3.21) e o painel de 25/09 (4.3.23) o Coolify se atualizou sozinho, sem janela nem backup prévio. O Traefik não atualiza sozinho (o painel avisa que a 3.7 está disponível e pede revisão do changelog). Uma atualização com regressão derruba todos os projetos ao mesmo tempo (R7 do PLAN). | Settings → auto-update ligado; versões divergentes entre as coletas. | Decisão sua: (a) manter ligado e aceitar o risco, contando com o backup diário fora do host (F0-22) e o runbook; ou (b) desligar e atualizar manualmente uma vez por mês, junto com o Renovate (ADR-006). Recomendo (b) a partir do momento em que houver dado real no Lastro. Traefik: manter em 3.6 até a F0-02 fechar o roteamento; atualizar depois, manualmente. | Antes da F0-21. |
 | R-I7 | Postgres Alpine (musl) tem collation de libc limitada. A ordenação de nomes em pt-BR depende de ICU ou de glibc. | O outro projeto usa `postgres:16-alpine`, que é o padrão do Coolify. | Usar `postgres:16` (Debian/glibc) no Lastro, com a mesma imagem do CI (ADR-026) para ter paridade. As extensões `ltree`, `pgcrypto` e `pg_trgm` vêm no contrib das duas imagens. | F0-02. |
+
+**Decisões de 25/09/2026 (Hugo):** aprovadas as mitigações de R-I3 (swapfile de 2 a 4 GB), R-I5 (limpeza automática do Docker) e R-I6 (auto-update do Coolify desligado, atualização manual mensal). Nenhuma foi implementada ainda; entram no ADR-002 e ficam a cargo do Hugo no host e no painel.
 
 ## 5. Decisão arm64 × x86
 
@@ -138,7 +140,7 @@ Com 2 vCPU e carga atual de 0,15, a folga de runtime sobra: a API atende um usu�
 
 | ADR | Situação | Observação |
 |---|---|---|
-| ADR-002 | **Confirmado** | Host arm64, Coolify 4.3.21 e base `node:24-slim` estão todos consistentes. Complementos propostos, que dependem da sua aprovação para entrar no ADR: (a) limites de memória por serviço, conforme a §5.1; (b) Postgres em imagem Debian (`postgres:16`), não Alpine. |
+| ADR-002 | **Confirmado e complementado** | Host arm64, Coolify e base `node:24-slim` estão todos consistentes. Complementos aprovados pelo Hugo em 25/09/2026 e registrados no ADR: (a) limites de memória por serviço, conforme a §5.1; (b) Postgres em imagem Debian (`postgres:16`), não Alpine. As decisões de operação do host (R-I3, R-I5, R-I6) também entraram no ADR. |
 | ADR-003 | **Sem mudança; validação na F0-02** | Traefik 3.6 suporta `PathPrefix`. Ponto de atenção para o S1: como a API usa `setGlobalPrefix('api')`, o Coolify **não** pode aplicar `StripPrefix` na rota `/api` (a opção "Strip Prefixes" vem ligada por padrão em domínios com path). |
 | ADR-005 | **Confirmado** | Redis 7 como serviço próprio, sem porta publicada. Limite do container de 384 MiB para acomodar os 256 MB de `maxmemory` mais o fork do AOF. |
 

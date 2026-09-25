@@ -52,7 +52,7 @@ Formato: contexto → decisão → consequências.
 
 **ADR-001 Um repositório.** `hmmb-lastro` com `backend/`, `frontend/`, `docs/`. Sem tooling de monorepo: cada app tem `package.json` e lockfile próprios; CI e Coolify usam filtros de path. O `openapi.json` do backend é lido pelo front por caminho relativo (resolve E13).
 
-**ADR-002 Hospedagem na OCI com Coolify.** Projeto Coolify "lastro" com `lastro-web` (estático), `lastro-api`, `lastro-jobs` (mesma imagem da API com `HTTP_ENABLED=false`), Postgres 16 e Redis 7 como serviços; na F2 entra `lastro-worker`. Backups pelo agendador do Coolify para OCI Object Storage. Consequências: custo zero adicional; host compartilhado (R7); imagens arm64; base `node:24-slim` (glibc) por causa do argon2 nativo (R19).
+**ADR-002 Hospedagem na OCI com Coolify.** Projeto Coolify "lastro" com `lastro-web` (estático), `lastro-api`, `lastro-jobs` (mesma imagem da API com `HTTP_ENABLED=false`), Postgres 16 e Redis 7 como serviços; na F2 entra `lastro-worker`. Backups pelo agendador do Coolify para OCI Object Storage. Consequências: custo zero adicional; host compartilhado (R7); imagens arm64; base `node:24-slim` (glibc) por causa do argon2 nativo (R19). Complementos de 25/09/2026 (F0-01, `docs/infra.md`): limite de memória por serviço (§5.1 do inventário); Postgres em imagem Debian `postgres:16`; host com auto-update do Coolify desligado, swapfile e limpeza automática do Docker.
 
 **ADR-003 Mesma origem para app e API.** SPA em `lastro.hmmb.app.br`; API em `/api` (`setGlobalPrefix('api')`). Sem CORS; cookies `SameSite=Lax`; CSRF no refresh mitigado por header customizado obrigatório. Fallback: subdomínio `api.` no mesmo site com CORS credenciado (sub-tarefa condicional em F0-02).
 
