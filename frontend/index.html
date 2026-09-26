@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lastro</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #0b1c2c; color: #e6eef7; font: 16px/1.5 system-ui, sans-serif; }
+    main { max-width: 40rem; padding: 2rem; }
+    h1 { margin: 0 0 .5rem; font-weight: 500; }
+    p { margin: 0 0 1rem; color: #9fb3c8; }
+    pre { background: #06111c; border: 1px solid #1d3a55; border-radius: 6px; padding: 1rem; overflow: auto; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Lastro</h1>
+    <p>Spike S1 (F0-02): estático servido pelo nginx na raiz. A resposta abaixo vem de <code>/api/health</code>, na mesma origem, sem CORS.</p>
+    <pre id="health">carregando /api/health…</pre>
+  </main>
+  <script>
+    fetch("/api/health")
+      .then((r) => r.text().then((t) => `HTTP ${r.status}\n${t}`))
+      .catch((e) => `falhou: ${e}`)
+      .then((t) => { document.getElementById("health").textContent = t; });
+  </script>
+</body>
+</html>
