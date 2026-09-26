@@ -11,14 +11,14 @@
 | `lastro-api` | Application (GitHub App, Dockerfile) | `hugommbrito/hmmb-lastro`, `backend/` | `0qyjctnyv46ymrgahcaskdgt` | 512 MiB | 35 MiB | Traefik, `lastro.hmmb.app.br/api` |
 | `lastro-web` | Application (GitHub App, Dockerfile) | `hugommbrito/hmmb-lastro`, `frontend/` | `dg8pc1k8dpvazwlieussczvs` | 64 MiB | 3 MiB | Traefik, `lastro.hmmb.app.br` |
 
-Projeto `lastro`, ambiente `production`, servidor `localhost` (o próprio host). Os containers se chamam `<uuid>` (bancos) ou `<uuid>-<timestamp>` (apps); a label `coolify.name` guarda o uuid, não o nome de exibição. Todos ficam na rede Docker `coolify`, com `restart: unless-stopped`.
+Projeto `lastro`, ambiente `production`, servidor `oci-hmmb-apps` no Coolify (renomeado de `localhost` em 26/09; hostname `hmmb-apps` no SO). Os containers se chamam `<uuid>` (bancos) ou `<uuid>-<timestamp>` (apps); a label `coolify.name` guarda o uuid, não o nome de exibição. Todos ficam na rede Docker `coolify`, com `restart: unless-stopped`.
 
 `lastro-jobs` (mesma imagem da API, `HTTP_ENABLED=false`) entra na F0-21; `lastro-worker` na F2.
 
 ## 2. Acesso
 
 - **Painel:** `http://140.238.158.164:8000`, em HTTP puro até o R-I1 ser tratado (domínio + TLS, antes da F0-21).
-- **Terminal:** Servers → hmmb-apps → Terminal dá shell de root com `docker` disponível. Trafega pelo WebSocket 6001 sem TLS (R-I1): serve para comandos que não mostram segredos. Para o resto, SSH `ubuntu@140.238.158.164` seguido de `sudo -i`. O usuário `ubuntu` não está no grupo `docker` e deve continuar fora.
+- **Terminal:** Servers → oci-hmmb-apps → Terminal dá shell de root com `docker` disponível. Trafega pelo WebSocket 6001 sem TLS (R-I1): serve para comandos que não mostram segredos. Para o resto, SSH `ubuntu@140.238.158.164` seguido de `sudo -i`. O usuário `ubuntu` não está no grupo `docker` e deve continuar fora.
 - **Origem de código:** o GitHub App do Coolify tem acesso ao repositório `hugommbrito/hmmb-lastro` (dado em 26/09). Sem isso o Coolify não lista o repositório nem recebe webhooks.
 - **Destino S3:** `oci-lastro-backups`, bucket `lastro-bckp-bucket` (`docs/infra.md` §7.3 e §7.4).
 
@@ -117,21 +117,25 @@ Provas do critério de aceite (26/09): `GET https://lastro.hmmb.app.br/api/healt
 | Campo | Valor |
 |---|---|
 | Onde | lastro-postgres → Backups |
-| Frequência | `0 3 * * *` no fuso da instância do Coolify (Settings → General → Instance Timezone: ⟨pendente⟩) |
+| Frequência | `0 3 * * *` no fuso da instância do Coolify, que é **UTC** (Settings → General → Instance timezone): 3h UTC = 0h em São Paulo = 23h em Toronto, uma hora antes do Docker Cleanup (`0 4 * * *`) |
 | Save to S3 | ligado, storage `oci-lastro-backups` |
 | Banco | `lastro` |
-| Retenção | 30 dias no S3; 2 cópias locais |
+| Retenção (aba Retention do backup) | Local backups: Backups to keep `2`, Days to keep `0`, Maximum storage `0`. S3 backups: Backups to keep `0`, Days to keep `30`, Maximum storage `0`. Zero significa sem limite naquele critério. |
+| Compressão | Servers → oci-hmmb-apps → Advanced → Backups: Backup compression CPU `Low (25%)` |
 | Rede de segurança | regra de lifecycle `delete-after-35-days` no bucket (`docs/infra.md` §7.3) |
 
-Backup manual: botão "Backup Now" na mesma tela. Resultado do teste de 26/09: ⟨pendente⟩. Teste de restauração: F0-22.
+Backup manual: botão "Backup Now" na mesma tela; a aba Executions lista status, caminho local, duração, tamanho e disponibilidade local/S3.
+
+Teste de 26/09: Success em 5 s, 865 B (banco vazio), disponível local e no S3. Objeto no bucket: `data/coolify/backups/databases/root-team-0/lastro-postgres-jjhxinte0yucncbwclqz5rbj/pg-dump-lastro-1790449799.dmp`, 19:10 UTC, tier Standard. O prefixo espelha o caminho local `/data/coolify/backups/databases/<team>/<nome>-<uuid>/`. Teste de restauração: F0-22.
 
 ## 6. Deploys, healthcheck e Watch Paths
 
-- **Gatilho.** Push na branch configurada → webhook do GitHub App → o Coolify compara os arquivos alterados nos commits do push com os Watch Paths; sem casamento, o deploy é pulado. Deploy manual pelo painel ignora Watch Paths. Teste de 26/09: ⟨pendente⟩.
+- **Gatilho.** Push na branch configurada → webhook do GitHub App → o Coolify compara os arquivos alterados nos commits do push com os Watch Paths; sem casamento, o deploy é pulado. Deploy manual pelo painel ignora Watch Paths.
+- **Teste de 26/09.** Push do commit `f8bb62e`, que só toca `docs/`: nenhum deploy, containers e imagens inalterados. Push do commit `a7f9506`, que só toca `frontend/index.html`: `lastro-web` redeployou pelo webhook para a imagem `dg8pc1…:a7f9506…` e `lastro-api` ficou na de `ec32009`. Critério de aceite dos Watch Paths atendido nos dois sentidos.
 - **Healthcheck.** O Coolify reconhece o `HEALTHCHECK` do Dockerfile ("Custom healthcheck found in Dockerfile") e só remove o container antigo depois de o novo ficar `healthy`. `node:24-slim` não tem `curl` nem `wget`, então o healthcheck da API usa `fetch` do próprio Node; o do nginx usa `wget` do BusyBox.
 - **Tempos observados.** Build da API 10 s e da web 3 s no host (imagens base já em cache); rolling update de 10 a 35 s, dominado pelo `start-period` e pelo intervalo do healthcheck.
 - **Limites de recursos** só entram no compose no start: um recurso que sobe antes de o limite ser salvo fica sem limite até o próximo Restart (aconteceu com o Postgres em 26/09).
-- **Concurrent Builds** (Servers → hmmb-apps → General): ⟨pendente⟩ (R-I4 recomenda 1).
+- **Concurrent Builds** (Servers → oci-hmmb-apps → Advanced → Builds): **2**, mantido de propósito pelo Hugo por causa dos dois apps do Echo; o R-I4 sugeria 1 e a sugestão não foi adotada. Deployment timeout 3600 s, queue limit 25. Verificação de disco `0 23 * * *` com aviso em 80%.
 
 ## 7. Verificação rápida
 
