@@ -1,0 +1,19 @@
+# EditorConfig (https://editorconfig.org). Formatação mecânica comum aos dois apps
+# e aos docs; ESLint e Prettier entram na F0-05 (backend) e na F0-17 (frontend).
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = true
+
+# Markdown usa dois espaços no fim da linha como quebra de linha.
+[*.md]
+trim_trailing_whitespace = false
+
+# Worker Python (F2): PEP 8 e o ruff format usam 4 espaços.
+[*.py]
+indent_size = 4
