@@ -12,6 +12,7 @@ Um único repositório (ADR-001), sem tooling de monorepo: cada app tem `package
 | `frontend/` | SPA React + Vite. Hoje só a página estática do spike S1; ver `frontend/README.md`. |
 | `docs/` | Plano, ADRs, planejamento narrativo, infra, runbooks e wireframes. |
 | `.github/workflows/` | CI do GitHub Actions; os workflows entram na F0-07, F0-18 e F1-30. |
+| `docker-compose.dev.yml` | Postgres 16 e Redis 7 para desenvolvimento local, com os parâmetros de produção (F0-06). |
 | `CLAUDE.md` | Instruções para sessões do Claude Code neste repositório (provisório até a F0-23). |
 
 ## Documentos
@@ -32,6 +33,18 @@ React 19, Vite 8, TypeScript 5.9, MUI 9, TanStack Router e Query; NestJS 11 com 
 ## Produção
 
 `https://lastro.hmmb.app.br` (SPA) e `https://lastro.hmmb.app.br/api` (API), no host OCI com Coolify (ADR-002, ADR-003). O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: todo push na `main` que toca uma dessas pastas reconstrói e redeploya a imagem correspondente, então os `Dockerfile`s precisam continuar buildando em qualquer commit da `main`.
+
+## Desenvolvimento local
+
+Node 24 (`.nvmrc`) e Docker. Banco e Redis sobem pelo compose de desenvolvimento, presos ao loopback; a API e o front rodam fora do Docker com `npm run start:dev` em cada app.
+
+```sh
+docker compose -f docker-compose.dev.yml up -d --wait
+docker compose -f docker-compose.dev.yml ps
+docker compose -f docker-compose.dev.yml down      # mantém os volumes; -v apaga os dados
+```
+
+Senhas e portas de desenvolvimento têm default no próprio compose; um `.env` na raiz sobrescreve (ver `.env.example`).
 
 ## Como trabalhar
 

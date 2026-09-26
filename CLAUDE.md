@@ -59,7 +59,7 @@ Lastro (nome de trabalho anterior: HMMB Finance) é um web app desktop-first, em
 
 ## Comandos
 
-Node 24 via `.nvmrc`. Backend (`backend/`, F0-05):
+Node 24 via `.nvmrc`. Postgres 16 e Redis 7 locais (raiz, F0-06): `docker compose -f docker-compose.dev.yml up -d --wait` e `docker compose -f docker-compose.dev.yml ps`. Backend (`backend/`, F0-05):
 
 ```sh
 npm ci

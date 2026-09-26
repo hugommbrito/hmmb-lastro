@@ -4,7 +4,7 @@ API do Lastro: NestJS 11 com Fastify, Drizzle ORM, Zod via nestjs-zod, BullMQ, P
 
 ## Estado
 
-A F0-05 entregou o bootstrap: NestJS + Fastify em ESM (ADR-027), configuração por env validada com Zod, logs Pino sem payloads, clock em `America/Sao_Paulo`, `GET /api/health`, ESLint, Prettier e Vitest. Ainda não há banco, contrato OpenAPI, auth nem jobs (F0-08 em diante).
+A F0-05 entregou o bootstrap: NestJS + Fastify em ESM (ADR-027), configuração por env validada com Zod, logs Pino sem payloads, clock em `America/Sao_Paulo`, `GET /api/health`, ESLint, Prettier e Vitest. Ainda não há banco, contrato OpenAPI, auth nem jobs (F0-08 em diante). Postgres e Redis locais sobem com `docker compose -f ../docker-compose.dev.yml up -d --wait` (F0-06); o app passa a usá-los na F0-09.
 
 Em produção, `https://lastro.hmmb.app.br/api` **ainda roda o `server.js` do spike S1**: o `Dockerfile` do spike copia só `package.json` e `server.js` e executa `node server.js`. A F0-20 troca o Dockerfile pelo build do NestJS e a F0-21 faz o deploy; até lá `server.js`, `Dockerfile` e `.dockerignore` não mudam, e o `"type": "module"` do `package.json` também atende ao `server.js`.
 
