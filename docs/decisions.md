@@ -32,6 +32,7 @@ Cada entrada traz a decisão e as consequências no corpo; o contexto está nos 
 | ADR-024 | Módulos NestJS | 2026-09-24 | aceito |
 | ADR-025 | Migrations, roles e deploy | 2026-09-24 | aceito |
 | ADR-026 | Testes de banco | 2026-09-24 | aceito |
+| ADR-027 | Backend em ESM | 2026-09-26 | proposto |
 
 ## ADR-001 — Um repositório
 
@@ -272,3 +273,12 @@ Além dos do handoff (`auth`, `users`, `institutions`, `accounts`, `portfolios`,
 - Substitui: —
 
 Vitest com `pool: forks`; um banco por worker criado a partir de um template já migrado; truncamento entre testes; RLS exercida pelo mesmo caminho da aplicação (`runAsUser`). CI com Postgres 16 e Redis como serviços.
+
+## ADR-027 — Backend em ESM
+
+- Data: 2026-09-26
+- Status: proposto (aguarda o Hugo)
+- Origem: F0-05. O `package.json` do backend precisa de `"type": "module"` enquanto o `server.js` do spike S1 roda em produção (até a F0-20), e com esse campo a saída do `tsc` só executa como ESM; a alternativa seria CJS com `.cjs` ou um `package.json` extra em `dist/`.
+- Substitui: —
+
+O backend NestJS compila e roda como ES modules: `module` e `moduleResolution` `nodenext`, `target es2024`, imports relativos com extensão `.js`, `import.meta` em vez de `__dirname`. Pacotes CJS do ecossistema (NestJS, nestjs-pino) entram pela interoperabilidade nativa do Node 24. Consequências: Vitest, Vite e Drizzle Kit são ESM-nativos e dispensam shim; o `nest build` continua sendo `tsc`; `eslint.config.js` e `vitest.config.ts` também são ESM; biblioteca que só funcione em CJS exige `createRequire` e aviso na tarefa que a adotar. Verificado na F0-05: build, testes com injeção por metadata e execução com `node dist/main.js`.

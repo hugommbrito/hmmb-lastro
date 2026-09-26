@@ -2,27 +2,44 @@
 
 API do Lastro: NestJS 11 com Fastify, Drizzle ORM, Zod via nestjs-zod, BullMQ, Passport + JWT e decimal.js (ADR-006, ADR-024). A mesma imagem roda como `lastro-api` (HTTP) e, a partir da F0-21, como `lastro-jobs` com `HTTP_ENABLED=false` (ADR-021). O worker Python da Fase 2 é outro serviço.
 
-## O que existe hoje
+## Estado
 
-Nada aqui é código de produto. O que roda em produção em `https://lastro.hmmb.app.br/api` ainda é o hello-world descartável do spike S1 (F0-02); a F0-04 só fixou o conjunto de versões.
+A F0-05 entregou o bootstrap: NestJS + Fastify em ESM (ADR-027), configuração por env validada com Zod, logs Pino sem payloads, clock em `America/Sao_Paulo`, `GET /api/health`, ESLint, Prettier e Vitest. Ainda não há banco, contrato OpenAPI, auth nem jobs (F0-08 em diante).
 
-| Arquivo | Origem | Papel | Substituído por |
-|---|---|---|---|
-| `server.js` | spike S1 | Servidor `node:http` sem framework. `GET /api/health` faz um self-test do argon2 e ecoa o path recebido, provando que o prefixo `/api` chega inteiro pelo Traefik (ADR-003). | F0-05 (bootstrap NestJS) |
-| `Dockerfile` | spike S1 | Multi-stage sobre `node:24-slim`, `npm ci --omit=dev` e `node server.js`, healthcheck com `fetch` do próprio Node. | F0-20 (Dockerfile definitivo) |
-| `.dockerignore` | spike S1 | Exclui `node_modules`, `.env*` e o próprio Dockerfile do contexto. | continua |
-| `package.json`, `package-lock.json`, `.npmrc` | F0-04 | Conjunto de versões do ADR-006 fixado em versões exatas (`save-exact`): NestJS 11 com adapter Fastify, Drizzle 0.45 e Kit 0.31, Zod 4.6, TypeScript 5.9, Vitest 5, `@types/node` 24; `argon2` continua porque o `server.js` o importa. `"type": "module"` também é herança do `server.js`. | F0-05 (scripts, ESLint, Prettier, Vitest, decisão ESM × CJS) |
-| `tsconfig.json`, `tsconfig.build.json`, `nest-cli.json` | F0-04 | Mínimo para `nest build` compilar: `strict`, decorators, `nodenext`. | F0-05 (config definitiva) |
-| `src/main.ts` | F0-04 | Placeholder vazio para o build ter um arquivo de entrada. | F0-05 (bootstrap real) |
+Em produção, `https://lastro.hmmb.app.br/api` **ainda roda o `server.js` do spike S1**: o `Dockerfile` do spike copia só `package.json` e `server.js` e executa `node server.js`. A F0-20 troca o Dockerfile pelo build do NestJS e a F0-21 faz o deploy; até lá `server.js`, `Dockerfile` e `.dockerignore` não mudam, e o `"type": "module"` do `package.json` também atende ao `server.js`.
 
-Comandos que já funcionam (Node 24, ver `.nvmrc`):
+## Comandos
+
+Node 24 (`.nvmrc`), versões exatas com `save-exact` (`.npmrc`).
 
 ```sh
 npm ci
-npm run build   # nest build, vazio até a F0-05
+npm run lint        # eslint + prettier --check
+npm run typecheck   # tsc --noEmit
+npm test            # vitest run
+npm run build       # nest build → dist/
+npm run start:dev   # nest start --watch; lê .env se existir (copie de .env.example)
+npm start           # node dist/main.js; env vem do ambiente
+npm run format      # prettier --write
 ```
 
-Ainda não há lint, typecheck nem testes; entram na F0-05. Os comandos definitivos do app chegam a este README e ao `CLAUDE.md` na F0-23.
+Variáveis de ambiente: `src/common/config/env.ts` é a lista completa (`NODE_ENV`, `PORT`, `LOG_LEVEL`) e `.env.example` documenta os defaults de desenvolvimento. Ambiente inválido derruba o processo na subida listando as variáveis erradas, sem os valores.
+
+## Estrutura
+
+| Caminho | Conteúdo |
+|---|---|
+| `src/main.ts` | Bootstrap: Fastify, logger Pino, prefixo `api` (ADR-003), shutdown hooks. |
+| `src/app.module.ts` | Módulo raiz. |
+| `src/common/constants.ts` | `APP_NAME` (ADR-023) e `GLOBAL_PREFIX`. |
+| `src/common/config/` | Schema Zod das variáveis de ambiente, `loadConfig()` e o token `APP_CONFIG`. |
+| `src/common/clock/` | `Clock` (`now()` em UTC, `today()` em `America/Sao_Paulo`), `SystemClock`, `FixedClock` para testes, token `CLOCK`. |
+| `src/common/logger/` | `nestjs-pino`: nível por env; por request só id, método, URL, status e duração; `pino-pretty` em desenvolvimento; healthcheck fora do log. |
+| `src/health/` | `GET /api/health`. |
+| `*.test.ts` ao lado do código | Vitest. `nest-di.test.ts` é o canário de decorators com metadata. |
+| `server.js` | Spike S1, o que roda em produção até a F0-20. Fora do ESLint e do Prettier. |
+
+Convenções: imports relativos levam `.js` (`moduleResolution: nodenext`); injeção por token (`CLOCK`, `APP_CONFIG`) para interfaces e por classe para serviços; `new Date()` só dentro do `Clock`; `process.env` só em `src/common/config`; regras do ADR-008 no `eslint.config.js` (assertion proibida, `parseFloat` e `Number(...)` proibidos, `eslint-disable` só com descrição).
 
 ## Deploy
 

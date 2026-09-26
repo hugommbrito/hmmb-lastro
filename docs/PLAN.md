@@ -102,6 +102,8 @@ Formato: contexto → decisão → consequências.
 
 **ADR-026 Testes de banco.** Vitest com `pool: forks`; um banco por worker criado a partir de um template já migrado; truncamento entre testes; RLS exercida pelo mesmo caminho da aplicação (`runAsUser`). CI com Postgres 16 e Redis como serviços.
 
+**ADR-027 Backend em ESM (proposto, F0-05).** NestJS compilado e executado como ES modules (`nodenext`, imports relativos com `.js`), porque o `package.json` precisa de `"type": "module"` enquanto o `server.js` do spike roda em produção e porque Vitest, Vite e Drizzle Kit são ESM-nativos. Detalhes em `docs/decisions.md`.
+
 ---
 
 ## 3. Artefatos de design (tarefas que precedem o código dependente)
@@ -197,7 +199,7 @@ Entregável: "logo por convite em `lastro.hmmb.app.br` e vejo o shell vazio em p
 
 | Feito | ID | Área | Objetivo | Dep. | Aceite | Verificação | Tam. |
 |---|---|---|---|---|---|---|---|
-| [ ] | F0-05 | backend | Bootstrap NestJS + Fastify, TS strict, ESLint (assertion, `parseFloat`), Prettier, Vitest, config por env validada com Zod, Pino sem payloads, `GET /api/health`, prefixo `api`, `APP_NAME`, clock `today()`/`now()` em `America/Sao_Paulo` com teste de virada de dia (21h–00h UTC). | F0-04 | `npm run lint typecheck test` verdes; health 200; teste de fuso passa. | Comandos + `curl`. | M |
+| [x] 2026-09-26 | F0-05 | backend | Bootstrap NestJS + Fastify, TS strict, ESLint (assertion, `parseFloat`), Prettier, Vitest, config por env validada com Zod, Pino sem payloads, `GET /api/health`, prefixo `api`, `APP_NAME`, clock `today()`/`now()` em `America/Sao_Paulo` com teste de virada de dia (21h–00h UTC). | F0-04 | `npm run lint typecheck test` verdes; health 200; teste de fuso passa. | Comandos + `curl`. | M |
 | [ ] | F0-06 | infra | `docker-compose.dev.yml` só com Postgres 16 (extensões) e Redis 7, healthchecks, volumes. | F0-03 | `docker compose up` saudável em máquina limpa. | `docker compose ps`. | P |
 | [ ] | DS-03 | docs | Convenções de API (ADR-007) com exemplos. | — | Checklist da §3 completo. | Revisão. | P |
 | [ ] | F0-07 | ci | `backend.yml`: filtro `backend/**`, Postgres + Redis de serviço, lint, typecheck, test; `commitlint` em PR. | F0-05, F0-06 | PR de exemplo verde; mudança só em `frontend/` não roda. | Actions. | P |

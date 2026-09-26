@@ -31,7 +31,7 @@ Lastro (nome de trabalho anterior: HMMB Finance) é um web app desktop-first, em
 - Backend: NestJS 11 com Fastify, Drizzle ORM, Zod via nestjs-zod, BullMQ, Passport + JWT, decimal.js. Postgres 16 (ltree, pgcrypto, pg_trgm) com RLS; Redis 7. Worker Python 3.12 só na Fase 2, como consumidor das projeções.
 - npm, Node 24 (`.nvmrc`), ESLint + Prettier, Vitest; uv, ruff, pyright, pytest no worker; GitHub Actions; Conventional Commits (ADR-008).
 - Produção no host OCI com Coolify; app e API na mesma origem (`lastro.hmmb.app.br` e `/api`); backups no OCI Object Storage (ADR-002, ADR-003).
-- O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: push na `main` que toca uma dessas pastas reconstrói e redeploya a imagem em produção. Os `Dockerfile`s e os arquivos que eles copiam precisam continuar buildando em todo commit. Até a F0-05, F0-17 e F0-21, `backend/` e `frontend/` contêm o spike S1; não os altere fora das tarefas que os substituem.
+- O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: push na `main` que toca uma dessas pastas reconstrói e redeploya a imagem em produção. Os `Dockerfile`s e os arquivos que eles copiam precisam continuar buildando em todo commit. O backend já tem o bootstrap NestJS (F0-05), mas o `Dockerfile` do spike S1 continua copiando e executando `server.js` em produção até a F0-20 e F0-21; `server.js`, `Dockerfile` e `.dockerignore` do backend e `index.html`, `Dockerfile` e `.dockerignore` do frontend só mudam nas tarefas que os substituem (F0-17, F0-20, F0-21).
 
 ## Regras de trabalho
 
@@ -51,6 +51,7 @@ Lastro (nome de trabalho anterior: HMMB Finance) é um web app desktop-first, em
 - Dinheiro: `NUMERIC` no banco, string no driver, decimal.js no Node e `Decimal` no Python; nunca `number` ou float (`parseFloat` e `Number(...)` proibidos nos módulos de domínio). Uma regra de arredondamento única. Datas `YYYY-MM-DD`; timestamps ISO-8601 UTC; "hoje" e agendamentos em `America/Sao_Paulo`.
 - Lógica de negócio só no NestJS; o frontend é UI e estado local. TWR, XIRR e snapshots só no worker (Fase 2).
 - Drizzle ORM, com queries complexas no tagged template `sql`. Módulos NestJS um por domínio, cada um com module, controller, service e dto (ADR-024).
+- Backend em ESM (ADR-027): imports relativos com `.js`, `import.meta` em vez de `__dirname`. "Hoje" e "agora" só pelo `Clock` (token `CLOCK`), nunca `new Date()` no domínio; configuração só pelo `APP_CONFIG`, nunca `process.env` fora de `src/common/config`.
 - Multi-tenant por RLS com `user_id` em toda tabela de usuário; a API conecta com role sem superusuário. Nunca desligar ou contornar RLS.
 - Logs estruturados, sem valores financeiros nem payloads de usuário. Lockfiles versionados.
 - Proibido sugerir: Next.js; serverless, BaaS ou no-code como alternativa arquitetural; ORM que não seja o Drizzle.
@@ -58,12 +59,18 @@ Lastro (nome de trabalho anterior: HMMB Finance) é um web app desktop-first, em
 
 ## Comandos
 
-Lint, typecheck e testes ainda não existem: entram na F0-05 (backend) e na F0-17 (frontend). Desde a F0-04, em cada app (`backend/` e `frontend/`, Node 24 via `.nvmrc`):
+Node 24 via `.nvmrc`. Backend (`backend/`, F0-05):
 
 ```sh
 npm ci
-npm run build   # builds vazios: nest build e vite build
+npm run lint        # eslint + prettier --check
+npm run typecheck   # tsc --noEmit
+npm test            # vitest run
+npm run build       # nest build
+npm run start:dev   # lê .env se existir
 ```
+
+Frontend (`frontend/`): `npm ci` e `npm run build` (F0-04); lint, typecheck e testes entram na F0-17.
 
 As imagens do spike precisam continuar buildando antes de qualquer commit que toque as pastas, porque o push redeploya a produção:
 

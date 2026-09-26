@@ -8,7 +8,7 @@ Um único repositório (ADR-001), sem tooling de monorepo: cada app tem `package
 
 | Pasta | Conteúdo |
 |---|---|
-| `backend/` | API NestJS + Fastify e processo de jobs (BullMQ). Hoje só o hello-world do spike S1; ver `backend/README.md`. |
+| `backend/` | API NestJS + Fastify e processo de jobs (BullMQ). Bootstrap da F0-05 em `src/`; em produção ainda roda o hello-world do spike S1 até a F0-20; ver `backend/README.md`. |
 | `frontend/` | SPA React + Vite. Hoje só a página estática do spike S1; ver `frontend/README.md`. |
 | `docs/` | Plano, ADRs, planejamento narrativo, infra, runbooks e wireframes. |
 | `.github/workflows/` | CI do GitHub Actions; os workflows entram na F0-07, F0-18 e F1-30. |
@@ -39,7 +39,7 @@ React 19, Vite 8, TypeScript 5.9, MUI 9, TanStack Router e Query; NestJS 11 com 
 - Conventional Commits. Modo provisório até haver uso real em produção: commits direto na `main`. Depois, branch por tarefa (`<tipo>/<id-da-tarefa>-<slug>`) e PR para a `main` (ADR-008). Detalhes em `CLAUDE.md`.
 - Decisão nova ou alterada vira ADR em `docs/decisions.md` antes do código.
 - Nenhum segredo no repositório; nenhum serviço pago sem aprovação.
-- `npm ci` e `npm run build` já funcionam nos dois apps (F0-04); lint, typecheck e testes entram na F0-05 (backend) e na F0-17 (frontend).
+- Backend: `npm run lint`, `npm run typecheck`, `npm test` e `npm run build` (F0-05). Frontend: `npm ci` e `npm run build` (F0-04); lint, typecheck e testes entram na F0-17.
 
 ## Licença
 
