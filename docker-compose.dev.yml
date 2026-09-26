@@ -1,0 +1,85 @@
+# Ambiente de desenvolvimento local do Lastro (F0-06): só Postgres 16 e Redis 7, com os mesmos
+# parâmetros de produção (docs/runbooks/coolify-lastro.md §3, ADR-002, ADR-005). API e front
+# rodam fora do Docker (`npm run start:dev`); o compose completo com api, jobs e web é a F0-20.
+#
+#   docker compose -f docker-compose.dev.yml up -d --wait
+#   docker compose -f docker-compose.dev.yml ps
+#   docker compose -f docker-compose.dev.yml down      # mantém os volumes
+#   docker compose -f docker-compose.dev.yml down -v   # apaga os dados
+#
+# Conexões (senhas só de desenvolvimento local; um .env na raiz sobrescreve, ver .env.example):
+#   postgres://postgres:lastro@127.0.0.1:5432/lastro
+#   redis://:lastro@127.0.0.1:6379
+# As portas ficam presas ao loopback: nada é exposto na rede local.
+# As extensões ltree, pgcrypto e pg_trgm vêm na imagem; quem as cria é a migration da F0-09.
+
+name: lastro-dev
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${LASTRO_DEV_DB_PASSWORD:-lastro}
+      POSTGRES_DB: lastro
+    # Mesmos parâmetros do lastro-postgres em produção (runbook §3.1).
+    command:
+      - postgres
+      - -c
+      - max_connections=50
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=768MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - maintenance_work_mem=64MB
+      - -c
+      - timezone=UTC
+      - -c
+      - log_timezone=UTC
+    ports:
+      - "127.0.0.1:${LASTRO_DEV_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      # Via TCP de propósito: durante o initdb a imagem sobe um servidor temporário só no socket Unix.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d lastro"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+  redis:
+    image: redis:7
+    # ADR-005: noeviction, AOF everysec, 256 MB; senha como em produção (runbook §3.2).
+    command:
+      - redis-server
+      - --maxmemory
+      - 256mb
+      - --maxmemory-policy
+      - noeviction
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+      - --requirepass
+      - ${LASTRO_DEV_REDIS_PASSWORD:-lastro}
+    environment:
+      # Autentica o redis-cli do healthcheck sem passar a senha na linha de comando.
+      REDISCLI_AUTH: ${LASTRO_DEV_REDIS_PASSWORD:-lastro}
+    ports:
+      - "127.0.0.1:${LASTRO_DEV_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+volumes:
+  postgres-data:
+  redis-data:
