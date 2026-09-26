@@ -1,0 +1,7 @@
+dist
+coverage
+package-lock.json
+# Spike S1, sai na F0-20.
+server.js
+# Docs ficam com formatação manual.
+*.md
