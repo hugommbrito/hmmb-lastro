@@ -17,8 +17,8 @@ Projeto **Lastro** no Coolify (nome de exibição com maiúscula, como o Echo; o
 
 ## 2. Acesso
 
-- **Painel:** `http://140.238.158.164:8000`, em HTTP puro até o R-I1 ser tratado (domínio + TLS, antes da F0-21).
-- **Terminal:** Servers → oci-hmmb-apps → Terminal dá shell de root com `docker` disponível. Trafega pelo WebSocket 6001 sem TLS (R-I1): serve para comandos que não mostram segredos. Para o resto, SSH `ubuntu@140.238.158.164` seguido de `sudo -i`. O usuário `ubuntu` não está no grupo `docker` e deve continuar fora.
+- **Painel:** `https://coolify.hmmb.app.br` (R-I1, 26/09): registro A no Registro.br e Settings → General → URL com esse valor; o Traefik serve o painel com Let's Encrypt. O acesso por `http://140.238.158.164:8000` está bloqueado pela Security List da OCI, que só libera 22, 80 e 443.
+- **Terminal:** Servers → oci-hmmb-apps → Terminal dá shell de root com `docker` disponível. Desde o R-I1 trafega pela 443 com TLS, em `/terminal/ws` do domínio do painel (o realtime vai em `/app`). Alternativa: SSH `ubuntu@140.238.158.164` seguido de `sudo -i`. O usuário `ubuntu` não está no grupo `docker` e deve continuar fora.
 - **Origem de código:** o GitHub App do Coolify tem acesso ao repositório `hugommbrito/hmmb-lastro` (dado em 26/09). Sem isso o Coolify não lista o repositório nem recebe webhooks.
 - **Destino S3:** `oci-lastro-backups`, bucket `lastro-bckp-bucket` (`docs/infra.md` §7.3 e §7.4).
 
@@ -85,7 +85,7 @@ As duas nascem em Project Lastro → New Resource → Private Repository (with G
 
 | Campo | `lastro-api` | `lastro-web` |
 |---|---|---|
-| Branch | `chore/f0-02-coolify-spike` durante o spike; **`main` após o merge** (§10) | idem |
+| Branch | `main` (o spike rodou em `chore/f0-02-coolify-spike`; trocado para `main` e redeployado em 26/09 após o merge do PR #1) | `main` |
 | Base Directory | `/backend` | `/frontend` |
 | Dockerfile Location | `/Dockerfile` (relativo ao Base Directory; o contexto do build é a pasta) | `/Dockerfile` |
 | Ports Exposes | `3000` | `80` |
@@ -160,8 +160,8 @@ docker exec vmgvftlajogzkse9tagloo4a sh -c 'redis-cli -a "$REDIS_PASSWORD" --no-
 
 Na ordem. Os passos 1 a 4 são do `docs/infra.md` (§4, §7 e §8).
 
-1. VM `VM.Standard.A1.Flex` arm64 em Toronto, Ubuntu 22.04, Coolify instalado; Security List com 22, 80 e 443 (o painel entra pelo domínio, R-I1). Swapfile de 4 GB com `vm.swappiness=10`; auto-update do Coolify desligado; Docker Cleanup `0 4 * * *` com limiar 80%.
-2. Registro A `lastro.hmmb.app.br` (e o do painel) apontando para o novo IP no Registro.br; esperar a propagação antes de deployar.
+1. VM `VM.Standard.A1.Flex` arm64 em Toronto, Ubuntu 22.04, Coolify instalado; Security List com 22, 80 e 443 apenas. Enquanto o domínio do painel não existir, liberar 8000 e 6001–6002 temporariamente para o seu IP e fechá-las depois (R-I1). Swapfile de 4 GB com `vm.swappiness=10`; auto-update do Coolify desligado; Docker Cleanup `0 4 * * *` com limiar 80%.
+2. Registros A `lastro.hmmb.app.br` e `coolify.hmmb.app.br` apontando para o novo IP no Registro.br; esperar a propagação. Settings → General → URL `https://coolify.hmmb.app.br` antes de fechar as portas do painel.
 3. GitHub App do Coolify com acesso a `hugommbrito/hmmb-lastro`.
 4. Object Storage: bucket `lastro-bckp-bucket`, usuário `svc-coolify-backups` com policy restrita ao bucket, Customer Secret Key; S3 Storage `oci-lastro-backups` validado no Coolify.
 5. Projeto `Lastro`; Postgres e Redis conforme §3 (imagem, configuração custom, limites, sem porta pública). Novas senhas geradas vão para o 1Password.
@@ -184,7 +184,5 @@ Na ordem. Os passos 1 a 4 são do `docs/infra.md` (§4, §7 e §8).
 
 ## 10. Pendências
 
-- Trocar a branch de `lastro-api` e `lastro-web` para `main` depois do merge do PR da F0-02 e redeployar.
-- R-I1: domínio e TLS para o painel; fechar 8000 e 6001–6002 na Security List. Antes da F0-21.
 - F0-21: `lastro-jobs`, segredos, `DATABASE_URL`/`DATABASE_URL_OWNER`, pre-start com migrations.
 - F0-22: restauração do backup testada.

@@ -8,7 +8,7 @@
 - Hoje o host usa 1,5 GiB de RAM (9,7 GiB disponíveis) e tem carga média de 0,1 a 0,2. A folga comporta o Lastro inteiro, incluindo o worker da F2.
 - **Decisão: arm64.** As imagens são construídas nativamente no host pelo Coolify. Não é preciso build multi-arch. Ver §5.
 - Nenhum ADR é contradito. O ADR-002 ganhou dois complementos aprovados em 25/09 (limites de memória por serviço e `postgres:16` Debian, §6); ADR-003 e ADR-005 ficam como estão.
-- Riscos confirmados: painel do Coolify (8000, HTTP) e WebSocket (6001–6002) abertos na Security List; auto-update do Coolify ligado (subiu de 4.3.21 para 4.3.23 entre as duas coletas). O dashboard do Traefik (8080) está bloqueado pela OCI. Ver §4.
+- Riscos confirmados em 24–25/09 e **tratados em 26/09**: painel do Coolify (8000, HTTP) e WebSocket (6001–6002) abertos na Security List (R-I1, fechado: painel em `https://coolify.hmmb.app.br`, portas removidas da Security List); auto-update do Coolify ligado (R-I6, desligado). O dashboard do Traefik (8080) sempre esteve bloqueado pela OCI. Ver §4.
 - Nada do que o Lastro precisa existia no host em 24/09: sem DNS, sem acesso do GitHub App ao repositório, sem bucket e sem destino S3 no Coolify. A lista de pré-requisitos da F0-02 está na §8; ela foi cumprida em 26/09 e a **F0-02 foi concluída no mesmo dia** (§9).
 
 ## 2. Host
@@ -65,19 +65,19 @@ Nenhum container tem limite de memória ou de CPU. Os apps A e B saíram do mesm
 |---|---|---|
 | 22 | sshd | Esperado. |
 | 80, 443 | Traefik | Esperado. |
-| 8080 | Traefik | Dashboard/API do Traefik (padrão do Coolify). Ver R-I1. |
-| 8000 | Coolify | Painel em HTTP puro. Ver R-I1. |
-| 6001, 6002 | coolify-realtime | WebSocket do painel. |
+| 8080 | Traefik | Dashboard/API do Traefik (padrão do Coolify). Bloqueada pela Security List. |
+| 8000 | Coolify | Painel em HTTP puro. Bloqueada pela Security List desde 26/09 (R-I1); o painel entra por `https://coolify.hmmb.app.br` via Traefik. |
+| 6001, 6002 | coolify-realtime | WebSocket e terminal do painel. Bloqueadas pela Security List desde 26/09; o Traefik as serve em `/app` e `/terminal/ws` do domínio do painel. |
 | 111 | rpcbind | O host escuta em 0.0.0.0, mas a chain INPUT rejeita (processo do host, sem regra de ACCEPT). |
 | 53 | systemd-resolved | Só em loopback. |
 
-Firewall local: o `ufw` está inativo. A chain INPUT do iptables aceita 22, 80, 443, 8000, 6001 e 6002 e rejeita o resto. **As portas publicadas pelo Docker não passam pela INPUT**: o Docker faz DNAT no PREROUTING e encaminha pela FORWARD. Por isso a única barreira efetiva para 8000, 8080, 6001 e 6002 é a Security List da OCI, que hoje libera 22, 80, 443, 8000 e 6001–6002 para `0.0.0.0/0` e **não** libera a 8080 (§7.2). Resultado: o dashboard do Traefik está bloqueado; o painel do Coolify em HTTP e o WebSocket do painel estão abertos à internet.
+Firewall local: o `ufw` está inativo. A chain INPUT do iptables aceita 22, 80, 443, 8000, 6001 e 6002 e rejeita o resto. **As portas publicadas pelo Docker não passam pela INPUT**: o Docker faz DNAT no PREROUTING e encaminha pela FORWARD. Por isso a única barreira efetiva para 8000, 8080, 6001 e 6002 é a Security List da OCI. Em 24/09 ela liberava 22, 80, 443, 8000 e 6001–6002 para `0.0.0.0/0` e não liberava a 8080; **desde 26/09 libera só 22, 80 e 443** (§7.2, R-I1). O Docker continua publicando 8000, 8080, 6001 e 6002 no host, mas nada chega a elas de fora; confirmado com `nc` e `curl` externos (timeout).
 
 ## 4. Riscos do host
 
 | # | Risco | Evidência | Mitigação | Quando |
 |---|---|---|---|---|
-| R-I1 | **Confirmado.** Painel do Coolify em HTTP puro (8000) e WebSocket do painel (6001–6002) abertos à internet. Login e sessão do painel trafegam sem TLS, e quem controla o painel controla todos os containers, inclusive o Postgres do Lastro. O dashboard do Traefik (8080) está publicado pelo Docker, mas a Security List não o libera. | Security List: `0.0.0.0/0` → 8000 e 6001–6002 (§7.2). | Definir um domínio para a instância do Coolify (Settings → Instance domain, ex.: `coolify.hmmb.app.br`, com registro A e TLS pelo Traefik); confirmar que painel e terminal funcionam pela 443; então remover 8000 e 6001–6002 da Security List (ou restringi-las ao seu IP). Manter a 8080 fora da lista. | Antes da F0-21 (primeiro dado real). Mudança sua no console e no painel. |
+| R-I1 | **Confirmado em 25/09 e tratado em 26/09.** Painel do Coolify em HTTP puro (8000) e WebSocket do painel (6001–6002) estavam abertos à internet: login e sessão sem TLS, e quem controla o painel controla todos os containers, inclusive o Postgres do Lastro. | Security List de 24/09: `0.0.0.0/0` → 8000 e 6001–6002. | **Implementado em 26/09 pelo Hugo:** registro A `coolify.hmmb.app.br → 140.238.158.164`; Settings → General → URL `https://coolify.hmmb.app.br` (o Coolify gera `/data/coolify/proxy/dynamic/coolify.yaml` roteando painel, WebSocket `/app` e terminal `/terminal/ws` pelo Traefik com Let's Encrypt); painel, realtime e terminal conferidos pelo domínio; então as regras de 8000 e 6001–6002 foram removidas da Default Security List. Verificação externa: `curl` e `nc` em 8000 e 6001 dão timeout, 443 responde, `/login` do painel 200 com TLS válido, Lastro intacto. A 8080 segue fora da lista. | Feito. |
 | R-I2 | ~~*Idle reclaim* do Always Free.~~ **Descartado.** A conta é Pay As You Go, que não está sujeita à recuperação por ociosidade. O custo do último mês é R$ 0,00. | Billing → plan type PAYG. | Como PAYG cobra o que passar da cota gratuita, criar um Budget na OCI com alerta em US$ 1 para pegar qualquer cobrança acidental (Object Storage acima de 20 GB, tráfego de saída acima de 10 TB, VM fora da cota). | Quando puder; não bloqueia. |
 | R-I3 | Sem swap e sem limites de memória. Um pico, como um build ou uma importação grande, aciona o OOM killer, que pode matar o Postgres de qualquer projeto. | `Swap: 0B` em 24/09; `mem_limit=0` em todos os containers. | **Swap implementado em 26/09:** `/swapfile` de 4 GB, `vm.swappiness=10` em `/etc/sysctl.d/99-swappiness.conf`, linha em `/etc/fstab` (verificado com `swapon --show` e `sysctl`). Limites de memória em todos os serviços do Lastro (§5.1): **implementados na F0-02 em 26/09** e conferidos com `docker inspect`. | Feito. |
 | R-I4 | Builds no host competem com a produção: 2 vCPU, e `tsc` + Vite + Nest usam 1,5 a 2,5 GiB e 100% de CPU por alguns minutos. | 2 vCPU. | Watch Paths (ADR-001), para builds só da pasta que mudou: **implementados e testados na F0-02**. Limite de builds concorrentes em 1: **não adotado**; o Hugo manteve 2 em 26/09 por causa dos dois apps do Echo. Se incomodar, gerar as imagens no GitHub Actions com runner `ubuntu-24.04-arm` e publicar no GHCR. É uma mudança futura e exigiria ADR. | Watch Paths feitos; reavaliar na F0-21 com o build real. |
@@ -163,12 +163,12 @@ Security List padrão da `vcn-20260916-1901` (sem NSG). Ingress:
 |---|---|---|---|
 | `0.0.0.0/0` | TCP | 22 | SSH |
 | `0.0.0.0/0` | TCP | 80, 443 | Traefik |
-| `0.0.0.0/0` | TCP | **8000** | Painel do Coolify em HTTP puro |
-| `0.0.0.0/0` | TCP | **6001–6002** | WebSocket e terminal do painel |
+| ~~`0.0.0.0/0`~~ | ~~TCP~~ | ~~**8000**~~ | Painel do Coolify em HTTP puro. **Removida em 26/09 (R-I1).** |
+| ~~`0.0.0.0/0`~~ | ~~TCP~~ | ~~**6001–6002**~~ | WebSocket e terminal do painel. **Removida em 26/09 (R-I1).** |
 | `0.0.0.0/0` | ICMP | tipo 3 código 4 | Path MTU |
 | `10.0.0.0/16` | ICMP | tipo 3 | Interno da VCN |
 
-A 8080 (dashboard do Traefik) não consta e fica bloqueada. As três linhas em negrito são o R-I1. O Lastro não precisa de nenhuma porta nova: entra pelo 443 do Traefik.
+A 8080 (dashboard do Traefik) não consta e fica bloqueada. As duas linhas riscadas eram o R-I1 e saíram em 26/09; desde então a lista libera só 22, 80, 443 e ICMP. O Lastro não precisa de nenhuma porta nova: entra pelo 443 do Traefik, assim como o painel.
 
 ### 7.3 Object Storage
 
@@ -196,7 +196,7 @@ A 8080 (dashboard do Traefik) não consta e fica bloqueada. As três linhas em n
 
 ### 7.5 DNS
 
-`hmmb.app.br` é administrado no Registro.br e tem subdomínios apontando para outros servidores, então **não** cabe wildcard. Hoje só `echo.hmmb.app.br` tem registro A para `140.238.158.164`. Para o Lastro: registro A `lastro.hmmb.app.br → 140.238.158.164`. Se o R-I1 for tratado pelo caminho do domínio, também `coolify.hmmb.app.br → 140.238.158.164`. O TTL do Registro.br é fixo; contar até uma hora de propagação antes de emitir o certificado.
+`hmmb.app.br` é administrado no Registro.br e tem subdomínios apontando para outros servidores, então **não** cabe wildcard. Hoje só `echo.hmmb.app.br` tem registro A para `140.238.158.164`. Registros A criados em 26/09: `lastro.hmmb.app.br → 140.238.158.164` (F0-02) e `coolify.hmmb.app.br → 140.238.158.164` (R-I1). O TTL do Registro.br é fixo; contar até uma hora de propagação antes de emitir o certificado.
 
 ## 8. Pré-requisitos da F0-02
 
@@ -211,7 +211,7 @@ Tudo que a F0-02 precisa e que só o Hugo pode fazer, em ordem. Nenhum item alte
 | 5 | Coolify → S3 Storages | Destino `oci-lastro-backups` validado. **Feito em 26/09** (§7.4). | Backup de teste do critério de aceite. |
 | 6 | OCI → Billing | Budget com alerta em US$ 1. **Feito em 26/09.** | Nada; proteção contra cobrança acidental. |
 
-Os itens 1 a 5 estavam prontos em 26/09 e a F0-02 foi executada no mesmo dia. Fora da F0-02, mas antes da F0-21 (primeiro dado real em produção): R-I1 (domínio para o painel e fechar 8000 e 6001–6002 na Security List).
+Os itens 1 a 5 estavam prontos em 26/09 e a F0-02 foi executada no mesmo dia. O R-I1 (domínio para o painel e fechamento de 8000 e 6001–6002 na Security List), previsto para antes da F0-21, também foi tratado em 26/09, logo depois da F0-02.
 
 ## 9. Resultado da F0-02 (26/09/2026)
 
@@ -226,5 +226,6 @@ Configuração completa em `docs/runbooks/coolify-lastro.md`. O que mudou nos n�
 | Build arm64 | hipótese (§5) | confirmado: `node:24-slim` + argon2 0.45.1 via prebuild `linux-arm64`, build de 10 s, sem compilador |
 | Roteamento `/api` | hipótese (ADR-003) | confirmado com Strip Prefixes desligado; fallback não acionado |
 | Concurrent builds | 2 | 2, mantido de propósito (R-I4) |
+| Portas do painel (R-I1) | 8000 e 6001–6002 abertas a `0.0.0.0/0`, painel em HTTP | painel em `https://coolify.hmmb.app.br` pelo Traefik; Security List só com 22, 80 e 443 |
 
 Achados novos, detalhados no runbook §9: o npm 11.19 da imagem bloqueia install scripts não aprovados (a F0-04 define a lista); o Coolify usa o `HEALTHCHECK` do Dockerfile, necessário porque `node:24-slim` não tem `curl`; limites de recurso só entram no compose no start do recurso; `PathPrefix(`/api`)` casa `/apix`; o banco nasceu com collation `en_US.utf8` (collation pt-BR na F0-09).
