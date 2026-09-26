@@ -31,15 +31,16 @@ Lastro (nome de trabalho anterior: HMMB Finance) é um web app desktop-first, em
 - Backend: NestJS 11 com Fastify, Drizzle ORM, Zod via nestjs-zod, BullMQ, Passport + JWT, decimal.js. Postgres 16 (ltree, pgcrypto, pg_trgm) com RLS; Redis 7. Worker Python 3.12 só na Fase 2, como consumidor das projeções.
 - npm, Node 24 (`.nvmrc`), ESLint + Prettier, Vitest; uv, ruff, pyright, pytest no worker; GitHub Actions; Conventional Commits (ADR-008).
 - Produção no host OCI com Coolify; app e API na mesma origem (`lastro.hmmb.app.br` e `/api`); backups no OCI Object Storage (ADR-002, ADR-003).
-- O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: merge que toca uma dessas pastas reconstrói e redeploya a imagem em produção. Os `Dockerfile`s e os arquivos que eles copiam precisam continuar buildando em todo commit. Até a F0-05, F0-17 e F0-21, `backend/` e `frontend/` contêm o spike S1; não os altere fora das tarefas que os substituem.
+- O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: push na `main` que toca uma dessas pastas reconstrói e redeploya a imagem em produção. Os `Dockerfile`s e os arquivos que eles copiam precisam continuar buildando em todo commit. Até a F0-05, F0-17 e F0-21, `backend/` e `frontend/` contêm o spike S1; não os altere fora das tarefas que os substituem.
 
 ## Regras de trabalho
 
 - Uma tarefa por vez, na ordem de `docs/PLAN.md`. Antes de começar, reler o ADR e o artefato de design que a tarefa cita. Não antecipar tarefas seguintes.
 - Ambiguidade de requisito: perguntar antes de implementar. Se algo contradiz um ADR, parar e perguntar antes de alterar o ADR.
 - ADR antes de código: decisão nova ou alterada entra em `docs/decisions.md`, ajusta `docs/PLAN.md` e o planejamento v3, e gera aviso ao Hugo se as instruções do Claude.ai precisarem mudar.
-- Branch por tarefa (`<tipo>/<id-da-tarefa>-<slug>`, por exemplo `chore/f0-03-repo-structure`), criada a partir da `main` atualizada. Nunca commitar na `main`. Antes de cada commit, conferir `git branch --show-current` e abortar se não for a branch esperada: o Hugo troca de branch neste diretório entre rodadas.
-- Commits em Conventional Commits, assinados via 1Password (se falhar com "Could not connect to socket", pedir para desbloquear e repetir). Push, PR e merge são do Hugo: ao terminar, entregar o comando `git push -u origin <branch>` e a URL de compare do GitHub.
+- **Modo provisório (desde 26/09/2026):** até o Hugo sinalizar que existe uso real em produção, os commits vão direto na `main`, atualizada com `git pull` antes de começar, sem branch por tarefa nem PR. Quando ele sinalizar, volta o fluxo do ADR-008: branch por tarefa (`<tipo>/<id-da-tarefa>-<slug>`) criada da `main` atualizada, PR com CI verde e nunca commitar na `main`.
+- Antes de cada commit, conferir `git branch --show-current` e abortar se não for a branch esperada (`main` no modo provisório): o Hugo troca de branch neste diretório entre rodadas.
+- Commits em Conventional Commits, assinados via 1Password (se falhar com "Could not connect to socket", pedir para desbloquear e repetir). O push é do Hugo: ao terminar, entregar o comando `git push` e, fora do modo provisório, a URL de compare do GitHub para o PR.
 - Ao concluir: lint, typecheck e testes verdes (quando existirem); `[x]` com a data na coluna Feito de `docs/PLAN.md`; se o contrato da API mudou, tipos do front regerados no mesmo PR.
 - Nenhum segredo no repositório, no chat ou nos docs. Nenhum serviço pago novo sem aprovação do Hugo; dependência de plano gratuito fica atrás de uma interface.
 

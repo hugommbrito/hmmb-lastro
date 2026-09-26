@@ -31,12 +31,12 @@ React 19, Vite 8, TypeScript 5.9, MUI 9, TanStack Router e Query; NestJS 11 com 
 
 ## Produção
 
-`https://lastro.hmmb.app.br` (SPA) e `https://lastro.hmmb.app.br/api` (API), no host OCI com Coolify (ADR-002, ADR-003). O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: todo merge que toca uma dessas pastas reconstrói e redeploya a imagem correspondente, então os `Dockerfile`s precisam continuar buildando em qualquer commit da `main`.
+`https://lastro.hmmb.app.br` (SPA) e `https://lastro.hmmb.app.br/api` (API), no host OCI com Coolify (ADR-002, ADR-003). O Coolify segue a `main` com Watch Paths `backend/**` e `frontend/**`: todo push na `main` que toca uma dessas pastas reconstrói e redeploya a imagem correspondente, então os `Dockerfile`s precisam continuar buildando em qualquer commit da `main`.
 
 ## Como trabalhar
 
 - Uma tarefa por vez, na ordem de `docs/PLAN.md`; ao concluir, `[x]` com a data na coluna Feito.
-- Branch por tarefa (`<tipo>/<id-da-tarefa>-<slug>`), Conventional Commits, PR para a `main`. Nunca commit direto na `main`.
+- Conventional Commits. Modo provisório até haver uso real em produção: commits direto na `main`. Depois, branch por tarefa (`<tipo>/<id-da-tarefa>-<slug>`) e PR para a `main` (ADR-008). Detalhes em `CLAUDE.md`.
 - Decisão nova ou alterada vira ADR em `docs/decisions.md` antes do código.
 - Nenhum segredo no repositório; nenhum serviço pago sem aprovação.
 - Lint, typecheck e testes entram na F0-05 (backend) e na F0-17 (frontend).
