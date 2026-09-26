@@ -189,7 +189,7 @@ A 8080 (dashboard do Traefik) não consta e fica bloqueada. As três linhas em n
 |---|---|---|
 | Versão e auto-update | 4.3.23; auto-update estava **ligado** em 25/09 e foi **desligado em 26/09**. | R-I6 tratado. |
 | Proxy | Traefik 3.6, sem erro de validação; o painel avisa que a 3.7 está disponível e pede revisão do changelog ("Attention required" no servidor). Compose do proxy publica 80, 443 (tcp e udp) e 8080. | Roteamento validado na F0-02; a atualização para 3.7 pode entrar na janela mensal (R-I6). |
-| Projetos | Um (Echo) em 25/09: dois serviços de app, um Postgres 16 Alpine e um Redis 7.2. Sem backup agendado. Em 26/09 entrou o segundo, `lastro` (§9). | Os bancos não são compartilhados (§3). O servidor foi renomeado de `localhost` para `oci-hmmb-apps` no painel em 26/09. |
+| Projetos | Um (Echo) em 25/09: dois serviços de app, um Postgres 16 Alpine e um Redis 7.2. Sem backup agendado. Em 26/09 entrou o segundo, `Lastro` (§9). | Os bancos não são compartilhados (§3). O servidor foi renomeado de `localhost` para `oci-hmmb-apps` no painel em 26/09. |
 | S3 Storages | Nenhum em 25/09. Em 26/09: destino `oci-lastro-backups` criado e validado (protocolo https, host `yzh83dfbyylc.compat.objectstorage.ca-toronto-1.oraclecloud.com` sem esquema, porta e path vazios, bucket `lastro-bckp-bucket`, região `ca-toronto-1`). O Coolify usa path-style fixo, que é o que a OCI exige com TLS. | Pronto para o agendamento de backup na F0-02. |
 | Sources | Um GitHub App, com acesso só ao repositório do Echo. | Dar acesso a `hugommbrito/hmmb-lastro` na instalação do App (GitHub → Settings → Applications → Configure → Repository access). Sem isso, o Coolify não vê o repositório nem recebe webhooks. |
 | Docker Cleanup | Configurado em 26/09 (R-I5): `0 4 * * *`, limiar 80%, só acima do limiar, volumes, redes e imagens retidas preservados. | Feito. |
@@ -221,7 +221,7 @@ Configuração completa em `docs/runbooks/coolify-lastro.md`. O que mudou nos n�
 |---|---|---|
 | Containers no host | 10, nenhum com limite de memória | 14; os quatro do Lastro com limite (`lastro-postgres` 1024 MiB, `lastro-redis` 384 MiB, `lastro-api` 512 MiB, `lastro-web` 64 MiB) |
 | RAM em repouso | ≈ 933 MiB somados nos containers | + ≈ 66 MiB do Lastro (25 + 3 + 35 + 3); host com 1,56 GiB em uso e 9,8 GiB disponíveis |
-| Projetos no Coolify | Echo | Echo e `lastro` |
+| Projetos no Coolify | Echo | Echo e Lastro (nome de exibição; recursos com o slug `lastro`) |
 | Backups agendados | nenhum | `lastro-postgres` diário às 3h UTC para `oci-lastro-backups`, retenção 30 dias; primeiro objeto confirmado no bucket |
 | Build arm64 | hipótese (§5) | confirmado: `node:24-slim` + argon2 0.45.1 via prebuild `linux-arm64`, build de 10 s, sem compilador |
 | Roteamento `/api` | hipótese (ADR-003) | confirmado com Strip Prefixes desligado; fallback não acionado |

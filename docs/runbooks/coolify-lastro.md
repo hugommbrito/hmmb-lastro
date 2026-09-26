@@ -1,4 +1,4 @@
-# Runbook — Coolify: projeto `lastro`
+# Runbook — Coolify: projeto Lastro
 
 > Configuração do projeto Lastro no Coolify do host `hmmb-apps` (`docs/infra.md`), feita no spike S1 (F0-02) em 26/09/2026. É a fonte da verdade para recriar o projeto se o host for perdido (§8). Segredos ficam no 1Password; aqui só nomes. Decisões: ADR-002, ADR-003, ADR-005.
 
@@ -11,7 +11,7 @@
 | `lastro-api` | Application (GitHub App, Dockerfile) | `hugommbrito/hmmb-lastro`, `backend/` | `0qyjctnyv46ymrgahcaskdgt` | 512 MiB | 35 MiB | Traefik, `lastro.hmmb.app.br/api` |
 | `lastro-web` | Application (GitHub App, Dockerfile) | `hugommbrito/hmmb-lastro`, `frontend/` | `dg8pc1k8dpvazwlieussczvs` | 64 MiB | 3 MiB | Traefik, `lastro.hmmb.app.br` |
 
-Projeto `lastro`, ambiente `production`, servidor `oci-hmmb-apps` no Coolify (renomeado de `localhost` em 26/09; hostname `hmmb-apps` no SO). Os containers se chamam `<uuid>` (bancos) ou `<uuid>-<timestamp>` (apps); a label `coolify.name` guarda o uuid, não o nome de exibição. Todos ficam na rede Docker `coolify`, com `restart: unless-stopped`.
+Projeto **Lastro** no Coolify (nome de exibição com maiúscula, como o Echo; o slug `lastro` do ADR-023 fica nos nomes dos recursos e do banco), ambiente `production`, servidor `oci-hmmb-apps` (renomeado de `localhost` em 26/09; hostname `hmmb-apps` no SO). Os containers se chamam `<uuid>` (bancos) ou `<uuid>-<timestamp>` (apps); a label `coolify.name` guarda o uuid, não o nome de exibição. Todos ficam na rede Docker `coolify`, com `restart: unless-stopped`.
 
 `lastro-jobs` (mesma imagem da API, `HTTP_ENABLED=false`) entra na F0-21; `lastro-worker` na F2.
 
@@ -81,7 +81,7 @@ Confirmado em 26/09 com `CONFIG GET`: `maxmemory 268435456`, `noeviction`, `appe
 
 ## 4. Aplicações
 
-As duas nascem em Project lastro → New Resource → Private Repository (with GitHub App) → repositório `hugommbrito/hmmb-lastro` → Build Pack `Dockerfile`.
+As duas nascem em Project Lastro → New Resource → Private Repository (with GitHub App) → repositório `hugommbrito/hmmb-lastro` → Build Pack `Dockerfile`.
 
 | Campo | `lastro-api` | `lastro-web` |
 |---|---|---|
@@ -164,7 +164,7 @@ Na ordem. Os passos 1 a 4 são do `docs/infra.md` (§4, §7 e §8).
 2. Registro A `lastro.hmmb.app.br` (e o do painel) apontando para o novo IP no Registro.br; esperar a propagação antes de deployar.
 3. GitHub App do Coolify com acesso a `hugommbrito/hmmb-lastro`.
 4. Object Storage: bucket `lastro-bckp-bucket`, usuário `svc-coolify-backups` com policy restrita ao bucket, Customer Secret Key; S3 Storage `oci-lastro-backups` validado no Coolify.
-5. Projeto `lastro`; Postgres e Redis conforme §3 (imagem, configuração custom, limites, sem porta pública). Novas senhas geradas vão para o 1Password.
+5. Projeto `Lastro`; Postgres e Redis conforme §3 (imagem, configuração custom, limites, sem porta pública). Novas senhas geradas vão para o 1Password.
 6. Restaurar o último dump do bucket no Postgres (`pg_restore` para o banco `lastro`; procedimento detalhado na F0-22).
 7. Aplicações conforme §4, branch `main`; variáveis de ambiente e segredos da F0-21 a partir do 1Password.
 8. Backups conforme §5; rodar um "Backup Now" e conferir o objeto no bucket.
