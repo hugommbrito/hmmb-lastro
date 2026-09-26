@@ -85,7 +85,7 @@ As duas nascem em Project Lastro → New Resource → Private Repository (with G
 
 | Campo | `lastro-api` | `lastro-web` |
 |---|---|---|
-| Branch | `chore/f0-02-coolify-spike` durante o spike; **`main` após o merge** (§10) | idem |
+| Branch | `main` (o spike rodou em `chore/f0-02-coolify-spike`; trocado para `main` e redeployado em 26/09 após o merge do PR #1) | `main` |
 | Base Directory | `/backend` | `/frontend` |
 | Dockerfile Location | `/Dockerfile` (relativo ao Base Directory; o contexto do build é a pasta) | `/Dockerfile` |
 | Ports Exposes | `3000` | `80` |
@@ -184,6 +184,5 @@ Na ordem. Os passos 1 a 4 são do `docs/infra.md` (§4, §7 e §8).
 
 ## 10. Pendências
 
-- Trocar a branch de `lastro-api` e `lastro-web` para `main` depois do merge do PR da F0-02 e redeployar.
 - F0-21: `lastro-jobs`, segredos, `DATABASE_URL`/`DATABASE_URL_OWNER`, pre-start com migrations.
 - F0-22: restauração do backup testada.
