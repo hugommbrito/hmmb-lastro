@@ -9,7 +9,7 @@
 - **Decisão: arm64.** As imagens são construídas nativamente no host pelo Coolify. Não é preciso build multi-arch. Ver §5.
 - Nenhum ADR é contradito. O ADR-002 ganhou dois complementos aprovados em 25/09 (limites de memória por serviço e `postgres:16` Debian, §6); ADR-003 e ADR-005 ficam como estão.
 - Riscos confirmados: painel do Coolify (8000, HTTP) e WebSocket (6001–6002) abertos na Security List; auto-update do Coolify ligado (subiu de 4.3.21 para 4.3.23 entre as duas coletas). O dashboard do Traefik (8080) está bloqueado pela OCI. Ver §4.
-- Nada do que o Lastro precisa existe ainda no host: sem DNS, sem acesso do GitHub App ao repositório, sem bucket e sem destino S3 no Coolify. A lista de pré-requisitos da F0-02 está na §8.
+- Nada do que o Lastro precisa existia no host em 24/09: sem DNS, sem acesso do GitHub App ao repositório, sem bucket e sem destino S3 no Coolify. A lista de pré-requisitos da F0-02 está na §8; ela foi cumprida em 26/09 e a **F0-02 foi concluída no mesmo dia** (§9).
 
 ## 2. Host
 
@@ -79,8 +79,8 @@ Firewall local: o `ufw` está inativo. A chain INPUT do iptables aceita 22, 80, 
 |---|---|---|---|---|
 | R-I1 | **Confirmado.** Painel do Coolify em HTTP puro (8000) e WebSocket do painel (6001–6002) abertos à internet. Login e sessão do painel trafegam sem TLS, e quem controla o painel controla todos os containers, inclusive o Postgres do Lastro. O dashboard do Traefik (8080) está publicado pelo Docker, mas a Security List não o libera. | Security List: `0.0.0.0/0` → 8000 e 6001–6002 (§7.2). | Definir um domínio para a instância do Coolify (Settings → Instance domain, ex.: `coolify.hmmb.app.br`, com registro A e TLS pelo Traefik); confirmar que painel e terminal funcionam pela 443; então remover 8000 e 6001–6002 da Security List (ou restringi-las ao seu IP). Manter a 8080 fora da lista. | Antes da F0-21 (primeiro dado real). Mudança sua no console e no painel. |
 | R-I2 | ~~*Idle reclaim* do Always Free.~~ **Descartado.** A conta é Pay As You Go, que não está sujeita à recuperação por ociosidade. O custo do último mês é R$ 0,00. | Billing → plan type PAYG. | Como PAYG cobra o que passar da cota gratuita, criar um Budget na OCI com alerta em US$ 1 para pegar qualquer cobrança acidental (Object Storage acima de 20 GB, tráfego de saída acima de 10 TB, VM fora da cota). | Quando puder; não bloqueia. |
-| R-I3 | Sem swap e sem limites de memória. Um pico, como um build ou uma importação grande, aciona o OOM killer, que pode matar o Postgres de qualquer projeto. | `Swap: 0B` em 24/09; `mem_limit=0` em todos os containers. | **Swap implementado em 26/09:** `/swapfile` de 4 GB, `vm.swappiness=10` em `/etc/sysctl.d/99-swappiness.conf`, linha em `/etc/fstab` (verificado com `swapon --show` e `sysctl`). Limites de memória em todos os serviços do Lastro (§5.1) entram na F0-02. | Swap feito; limites na F0-02. |
-| R-I4 | Builds no host competem com a produção: 2 vCPU, e `tsc` + Vite + Nest usam 1,5 a 2,5 GiB e 100% de CPU por alguns minutos. | 2 vCPU. | Watch Paths (ADR-001), para builds só da pasta que mudou; limite de builds concorrentes do Coolify em 1. Se incomodar, gerar as imagens no GitHub Actions com runner `ubuntu-24.04-arm` e publicar no GHCR. É uma mudança futura e exigiria ADR. | F0-02 / F0-21. |
+| R-I3 | Sem swap e sem limites de memória. Um pico, como um build ou uma importação grande, aciona o OOM killer, que pode matar o Postgres de qualquer projeto. | `Swap: 0B` em 24/09; `mem_limit=0` em todos os containers. | **Swap implementado em 26/09:** `/swapfile` de 4 GB, `vm.swappiness=10` em `/etc/sysctl.d/99-swappiness.conf`, linha em `/etc/fstab` (verificado com `swapon --show` e `sysctl`). Limites de memória em todos os serviços do Lastro (§5.1): **implementados na F0-02 em 26/09** e conferidos com `docker inspect`. | Feito. |
+| R-I4 | Builds no host competem com a produção: 2 vCPU, e `tsc` + Vite + Nest usam 1,5 a 2,5 GiB e 100% de CPU por alguns minutos. | 2 vCPU. | Watch Paths (ADR-001), para builds só da pasta que mudou: **implementados e testados na F0-02**. Limite de builds concorrentes em 1: **não adotado**; o Hugo manteve 2 em 26/09 por causa dos dois apps do Echo. Se incomodar, gerar as imagens no GitHub Actions com runner `ubuntu-24.04-arm` e publicar no GHCR. É uma mudança futura e exigiria ADR. | Watch Paths feitos; reavaliar na F0-21 com o build real. |
 | R-I5 | Disco consumido por imagens antigas e build cache. | 8,8 GB recuperáveis em 24/09; 33% de uso em 26/09. | **Implementado em 26/09.** Servers → Docker Cleanup: frequência `0 4 * * *`, limiar 80%, gatilho "only above disk threshold", manter volumes não usados, redes não usadas e imagens retidas. Limpeza manual rodada uma vez: 0 B recuperado, porque o que sobra são imagens de rollback do Echo, preservadas de propósito. O Lastro inteiro cabe em ~6 GB (§5.2). | Feito. |
 | R-I6 | **Confirmado.** Auto-update do Coolify ligado: entre o SSH de 24/09 (4.3.21) e o painel de 25/09 (4.3.23) o Coolify se atualizou sozinho, sem janela nem backup prévio. O Traefik não atualiza sozinho (o painel avisa que a 3.7 está disponível e pede revisão do changelog). Uma atualização com regressão derruba todos os projetos ao mesmo tempo (R7 do PLAN). | Settings → auto-update ligado; versões divergentes entre as coletas. | **Implementado em 26/09:** auto-update desligado em Settings → Updates; a checagem de versão continua ligada e só avisa. Regra: atualização manual uma vez por mês, junto com o Renovate (ADR-006), sempre com o backup do dia anterior confirmado no bucket. Traefik: manter em 3.6 até a F0-02 fechar o roteamento; atualizar depois, manualmente. | Feito. |
 | R-I7 | Postgres Alpine (musl) tem collation de libc limitada. A ordenação de nomes em pt-BR depende de ICU ou de glibc. | O outro projeto usa `postgres:16-alpine`, que é o padrão do Coolify. | Usar `postgres:16` (Debian/glibc) no Lastro, com a mesma imagem do CI (ADR-026) para ter paridade. As extensões `ltree`, `pgcrypto` e `pg_trgm` vêm no contrib das duas imagens. | F0-02. |
@@ -141,7 +141,7 @@ Com 2 vCPU e carga atual de 0,15, a folga de runtime sobra: a API atende um usu�
 | ADR | Situação | Observação |
 |---|---|---|
 | ADR-002 | **Confirmado e complementado** | Host arm64, Coolify e base `node:24-slim` estão todos consistentes. Complementos aprovados pelo Hugo em 25/09/2026 e registrados no ADR: (a) limites de memória por serviço, conforme a §5.1; (b) Postgres em imagem Debian (`postgres:16`), não Alpine. As decisões de operação do host (R-I3, R-I5, R-I6) também entraram no ADR. |
-| ADR-003 | **Sem mudança; validação na F0-02** | Traefik 3.6 suporta `PathPrefix`. Ponto de atenção para o S1: como a API usa `setGlobalPrefix('api')`, o Coolify **não** pode aplicar `StripPrefix` na rota `/api` (a opção "Strip Prefixes" vem ligada por padrão em domínios com path). |
+| ADR-003 | **Confirmado na F0-02** | Traefik 3.6 suporta `PathPrefix`. Com "Strip Prefixes" desligado no `lastro-api`, `GET https://lastro.hmmb.app.br/api/health` chegou com o path inteiro e sem middleware `stripprefix` nas labels; o fallback de subdomínio + CORS não foi acionado. Restrição derivada: `PathPrefix(`/api`)` casa qualquer path que comece com `/api`, então nenhuma rota da SPA pode começar assim. Detalhes em `docs/runbooks/coolify-lastro.md` §4.1. |
 | ADR-005 | **Confirmado** | Redis 7 como serviço próprio, sem porta publicada. Limite do container de 384 MiB para acomodar os 256 MB de `maxmemory` mais o fork do AOF. |
 
 ## 7. Conferências no console da OCI e no painel do Coolify (25/09/2026)
@@ -181,15 +181,15 @@ A 8080 (dashboard do Traefik) não consta e fica bloqueada. As três linhas em n
 | Uso contra a cota gratuita | 10 MiB de 20 GB. |
 | Customer Secret Key (credencial S3) | **Não conferido.** Fica em Identity → Users → seu usuário → Customer Secret Keys. Se não houver, criar uma; a chave secreta só aparece na criação. |
 
-**Bucket do Lastro, criado em 26/09/2026:** `lastro-bckp-bucket`, compartimento `hmmb (root)`, privado, sem auto-tiering, sem versionamento, chave gerenciada pela Oracle (SSE em repouso, atende ao F0-22). Acesso pela API S3 com credencial de um usuário dedicado: `svc-coolify-backups`, no grupo `coolify-backups`, com policy `coolify-backups-lastro` no root limitada a esse bucket (`read buckets` e `manage objects` com `where target.bucket.name = 'lastro-bckp-bucket'`); a Customer Secret Key está no 1Password. Ponto de atenção registrado: a primeira validação falhou com `NoSuchBucket` porque a policy citava outro nome; a OCI devolve 404 tanto para bucket inexistente quanto para falta de permissão. Regra de lifecycle de 35 dias como rede de segurança: opcional, não confirmada. Os PDFs da F3 ficam em outro bucket, criado na hora.
+**Bucket do Lastro, criado em 26/09/2026:** `lastro-bckp-bucket`, compartimento `hmmb (root)`, privado, sem auto-tiering, sem versionamento, chave gerenciada pela Oracle (SSE em repouso, atende ao F0-22). Acesso pela API S3 com credencial de um usuário dedicado: `svc-coolify-backups`, no grupo `coolify-backups`, com policy `coolify-backups-lastro` no root limitada a esse bucket (`read buckets` e `manage objects` com `where target.bucket.name = 'lastro-bckp-bucket'`); a Customer Secret Key está no 1Password. Ponto de atenção registrado: a primeira validação falhou com `NoSuchBucket` porque a policy citava outro nome; a OCI devolve 404 tanto para bucket inexistente quanto para falta de permissão. Regra de lifecycle de 35 dias (`delete-after-35-days`) ativa como rede de segurança para a retenção de 30 dias do Coolify, confirmada em 26/09. Os PDFs da F3 ficam em outro bucket, criado na hora.
 
 ### 7.4 Painel do Coolify
 
 | Item | Resultado | Consequência |
 |---|---|---|
 | Versão e auto-update | 4.3.23; auto-update estava **ligado** em 25/09 e foi **desligado em 26/09**. | R-I6 tratado. |
-| Proxy | Traefik 3.6, sem erro de validação; o painel avisa que a 3.7 está disponível e pede revisão do changelog ("Attention required" no servidor). Compose do proxy publica 80, 443 (tcp e udp) e 8080. | Manter em 3.6 até a F0-02 validar o roteamento. |
-| Projetos | Um (Echo): dois serviços de app, um Postgres 16 Alpine e um Redis 7.2. Sem backup agendado. | O Lastro é o segundo projeto; os bancos não são compartilhados (§3). |
+| Proxy | Traefik 3.6, sem erro de validação; o painel avisa que a 3.7 está disponível e pede revisão do changelog ("Attention required" no servidor). Compose do proxy publica 80, 443 (tcp e udp) e 8080. | Roteamento validado na F0-02; a atualização para 3.7 pode entrar na janela mensal (R-I6). |
+| Projetos | Um (Echo) em 25/09: dois serviços de app, um Postgres 16 Alpine e um Redis 7.2. Sem backup agendado. Em 26/09 entrou o segundo, `Lastro` (§9). | Os bancos não são compartilhados (§3). O servidor foi renomeado de `localhost` para `oci-hmmb-apps` no painel em 26/09. |
 | S3 Storages | Nenhum em 25/09. Em 26/09: destino `oci-lastro-backups` criado e validado (protocolo https, host `yzh83dfbyylc.compat.objectstorage.ca-toronto-1.oraclecloud.com` sem esquema, porta e path vazios, bucket `lastro-bckp-bucket`, região `ca-toronto-1`). O Coolify usa path-style fixo, que é o que a OCI exige com TLS. | Pronto para o agendamento de backup na F0-02. |
 | Sources | Um GitHub App, com acesso só ao repositório do Echo. | Dar acesso a `hugommbrito/hmmb-lastro` na instalação do App (GitHub → Settings → Applications → Configure → Repository access). Sem isso, o Coolify não vê o repositório nem recebe webhooks. |
 | Docker Cleanup | Configurado em 26/09 (R-I5): `0 4 * * *`, limiar 80%, só acima do limiar, volumes, redes e imagens retidas preservados. | Feito. |
@@ -209,6 +209,22 @@ Tudo que a F0-02 precisa e que só o Hugo pode fazer, em ordem. Nenhum item alte
 | 3 | OCI → Object Storage | Bucket `lastro-bckp-bucket` (privado, sem auto-tiering) no compartimento root. **Feito em 26/09** (§7.3). | Destino de backup. |
 | 4 | OCI → Identity | Usuário `svc-coolify-backups`, grupo e policy restritos ao bucket, Customer Secret Key no 1Password. **Feito em 26/09** (§7.3). | Destino S3 no Coolify. |
 | 5 | Coolify → S3 Storages | Destino `oci-lastro-backups` validado. **Feito em 26/09** (§7.4). | Backup de teste do critério de aceite. |
-| 6 | OCI → Billing | Budget com alerta em US$ 1. Não confirmado. | Nada; proteção contra cobrança acidental. |
+| 6 | OCI → Billing | Budget com alerta em US$ 1. **Feito em 26/09.** | Nada; proteção contra cobrança acidental. |
 
-Os itens 1 a 5 estão prontos; a F0-02 pode começar. Fora da F0-02, mas antes da F0-21 (primeiro dado real em produção): R-I1 (domínio para o painel e fechar 8000 e 6001–6002 na Security List).
+Os itens 1 a 5 estavam prontos em 26/09 e a F0-02 foi executada no mesmo dia. Fora da F0-02, mas antes da F0-21 (primeiro dado real em produção): R-I1 (domínio para o painel e fechar 8000 e 6001–6002 na Security List).
+
+## 9. Resultado da F0-02 (26/09/2026)
+
+Configuração completa em `docs/runbooks/coolify-lastro.md`. O que mudou nos números deste inventário:
+
+| Item | Antes (24–25/09) | Depois (26/09) |
+|---|---|---|
+| Containers no host | 10, nenhum com limite de memória | 14; os quatro do Lastro com limite (`lastro-postgres` 1024 MiB, `lastro-redis` 384 MiB, `lastro-api` 512 MiB, `lastro-web` 64 MiB) |
+| RAM em repouso | ≈ 933 MiB somados nos containers | + ≈ 66 MiB do Lastro (25 + 3 + 35 + 3); host com 1,56 GiB em uso e 9,8 GiB disponíveis |
+| Projetos no Coolify | Echo | Echo e Lastro (nome de exibição; recursos com o slug `lastro`) |
+| Backups agendados | nenhum | `lastro-postgres` diário às 3h UTC para `oci-lastro-backups`, retenção 30 dias; primeiro objeto confirmado no bucket |
+| Build arm64 | hipótese (§5) | confirmado: `node:24-slim` + argon2 0.45.1 via prebuild `linux-arm64`, build de 10 s, sem compilador |
+| Roteamento `/api` | hipótese (ADR-003) | confirmado com Strip Prefixes desligado; fallback não acionado |
+| Concurrent builds | 2 | 2, mantido de propósito (R-I4) |
+
+Achados novos, detalhados no runbook §9: o npm 11.19 da imagem bloqueia install scripts não aprovados (a F0-04 define a lista); o Coolify usa o `HEALTHCHECK` do Dockerfile, necessário porque `node:24-slim` não tem `curl`; limites de recurso só entram no compose no start do recurso; `PathPrefix(`/api`)` casa `/apix`; o banco nasceu com collation `en_US.utf8` (collation pt-BR na F0-09).
