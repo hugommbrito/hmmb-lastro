@@ -1,0 +1,37 @@
+{
+  "name": "lastro-web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "SPA do Lastro (React + Vite). A F0-04 fixou as versões (ADR-006); o index.html em produção ainda é o do spike S1 até a F0-17.",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@hookform/resolvers": "5.9.1",
+    "@mui/material": "9.4.0",
+    "@tanstack/react-query": "5.104.0",
+    "@tanstack/react-router": "1.170.39",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-hook-form": "7.89.0",
+    "recharts": "3.10.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "1.168.40",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.1",
+    "vitest": "5.0.2"
+  }
+}
