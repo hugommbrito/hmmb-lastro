@@ -58,7 +58,14 @@ Lastro (nome de trabalho anterior: HMMB Finance) é um web app desktop-first, em
 
 ## Comandos
 
-Ainda não existem comandos de app: lint, typecheck e testes entram na F0-05 (backend) e na F0-17 (frontend). Hoje só há os builds do spike, que precisam passar antes de qualquer merge que toque as pastas:
+Lint, typecheck e testes ainda não existem: entram na F0-05 (backend) e na F0-17 (frontend). Desde a F0-04, em cada app (`backend/` e `frontend/`, Node 24 via `.nvmrc`):
+
+```sh
+npm ci
+npm run build   # builds vazios: nest build e vite build
+```
+
+As imagens do spike precisam continuar buildando antes de qualquer commit que toque as pastas, porque o push redeploya a produção:
 
 ```sh
 docker build -t lastro-api:local backend/

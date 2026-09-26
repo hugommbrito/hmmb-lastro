@@ -39,7 +39,7 @@ React 19, Vite 8, TypeScript 5.9, MUI 9, TanStack Router e Query; NestJS 11 com 
 - Conventional Commits. Modo provisório até haver uso real em produção: commits direto na `main`. Depois, branch por tarefa (`<tipo>/<id-da-tarefa>-<slug>`) e PR para a `main` (ADR-008). Detalhes em `CLAUDE.md`.
 - Decisão nova ou alterada vira ADR em `docs/decisions.md` antes do código.
 - Nenhum segredo no repositório; nenhum serviço pago sem aprovação.
-- Lint, typecheck e testes entram na F0-05 (backend) e na F0-17 (frontend).
+- `npm ci` e `npm run build` já funcionam nos dois apps (F0-04); lint, typecheck e testes entram na F0-05 (backend) e na F0-17 (frontend).
 
 ## Licença
 

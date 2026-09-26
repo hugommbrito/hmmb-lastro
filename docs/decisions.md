@@ -87,8 +87,11 @@ Serviço do Coolify, `maxmemory-policy noeviction`, AOF `everysec`, `maxmemory` 
 - Status: aceito
 - Origem: sessão de planejamento com o Hugo (respostas às decisões D1–D16 do handoff e revisões do plano).
 - Substitui: Planejamento v2 §4 (React 18, MUI v6).
+- Atualização: 2026-09-26, após o spike S0 (F0-04).
 
 React 19, MUI 9, Vite 8, TanStack Router/Query atuais, Zod 4, RHF 7, Recharts 3; TypeScript 5.9 fixo nos dois apps até typescript-eslint e openapi-typescript declararem 6/7; NestJS 11 por padrão, 12 só se o spike S2 provar nestjs-zod nele; Drizzle 0.45 + Kit 0.31; Node 24 LTS; Python 3.12 com pandas 3, scipy 1.18, psycopg 3.3, bullmq 3.2. Conjunto do front fixado no spike S0. Lockfiles versionados; Renovate mensal agrupado.
+
+Fixado na F0-04 (spike S0, 2026-09-26) em versões exatas nos dois `package.json`, com `save-exact` no `.npmrc` de cada app: front com React 19.3, MUI 9.4 (Emotion 11), TanStack Router 1.170 (com `@tanstack/router-plugin`) e Query 5.104, React Hook Form 7.89 com `@hookform/resolvers`, Zod 4.6, Recharts 3.10, Vite 8.3 com `@vitejs/plugin-react` 6, Vitest 5.0, TypeScript 5.9.3; back com NestJS 11.2 (`@nestjs/common`, `core`, `platform-fastify` com Fastify 5.11, `testing`, CLI 11.0), Drizzle 0.45.3 e Kit 0.31, Zod 4.6, `@types/node` 24, Vitest 5.0, TypeScript 5.9.3. TypeScript 7.0 e NestJS 12.1, já publicados no npm nessa data, ficam de fora de propósito até as condições acima. Os números exatos estão nos `package.json`; bumps entram pelo Renovate mensal. ESLint, Prettier e Testing Library são fixados quando configurados (F0-05 e F0-17).
 
 ## ADR-007 — Contrato front/back
 
