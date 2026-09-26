@@ -181,7 +181,7 @@ A 8080 (dashboard do Traefik) não consta e fica bloqueada. As três linhas em n
 | Uso contra a cota gratuita | 10 MiB de 20 GB. |
 | Customer Secret Key (credencial S3) | **Não conferido.** Fica em Identity → Users → seu usuário → Customer Secret Keys. Se não houver, criar uma; a chave secreta só aparece na criação. |
 
-**Bucket do Lastro, criado em 26/09/2026:** `lastro-bckp-bucket`, compartimento `hmmb (root)`, privado, sem auto-tiering, sem versionamento, chave gerenciada pela Oracle (SSE em repouso, atende ao F0-22). Acesso pela API S3 com credencial de um usuário dedicado: `svc-coolify-backups`, no grupo `coolify-backups`, com policy `coolify-backups-lastro` no root limitada a esse bucket (`read buckets` e `manage objects` com `where target.bucket.name = 'lastro-bckp-bucket'`); a Customer Secret Key está no 1Password. Ponto de atenção registrado: a primeira validação falhou com `NoSuchBucket` porque a policy citava outro nome; a OCI devolve 404 tanto para bucket inexistente quanto para falta de permissão. Regra de lifecycle de 35 dias como rede de segurança: opcional, não confirmada. Os PDFs da F3 ficam em outro bucket, criado na hora.
+**Bucket do Lastro, criado em 26/09/2026:** `lastro-bckp-bucket`, compartimento `hmmb (root)`, privado, sem auto-tiering, sem versionamento, chave gerenciada pela Oracle (SSE em repouso, atende ao F0-22). Acesso pela API S3 com credencial de um usuário dedicado: `svc-coolify-backups`, no grupo `coolify-backups`, com policy `coolify-backups-lastro` no root limitada a esse bucket (`read buckets` e `manage objects` com `where target.bucket.name = 'lastro-bckp-bucket'`); a Customer Secret Key está no 1Password. Ponto de atenção registrado: a primeira validação falhou com `NoSuchBucket` porque a policy citava outro nome; a OCI devolve 404 tanto para bucket inexistente quanto para falta de permissão. Regra de lifecycle de 35 dias (`delete-after-35-days`) ativa como rede de segurança para a retenção de 30 dias do Coolify, confirmada em 26/09. Os PDFs da F3 ficam em outro bucket, criado na hora.
 
 ### 7.4 Painel do Coolify
 
@@ -209,6 +209,6 @@ Tudo que a F0-02 precisa e que só o Hugo pode fazer, em ordem. Nenhum item alte
 | 3 | OCI → Object Storage | Bucket `lastro-bckp-bucket` (privado, sem auto-tiering) no compartimento root. **Feito em 26/09** (§7.3). | Destino de backup. |
 | 4 | OCI → Identity | Usuário `svc-coolify-backups`, grupo e policy restritos ao bucket, Customer Secret Key no 1Password. **Feito em 26/09** (§7.3). | Destino S3 no Coolify. |
 | 5 | Coolify → S3 Storages | Destino `oci-lastro-backups` validado. **Feito em 26/09** (§7.4). | Backup de teste do critério de aceite. |
-| 6 | OCI → Billing | Budget com alerta em US$ 1. Não confirmado. | Nada; proteção contra cobrança acidental. |
+| 6 | OCI → Billing | Budget com alerta em US$ 1. **Feito em 26/09.** | Nada; proteção contra cobrança acidental. |
 
 Os itens 1 a 5 estão prontos; a F0-02 pode começar. Fora da F0-02, mas antes da F0-21 (primeiro dado real em produção): R-I1 (domínio para o painel e fechar 8000 e 6001–6002 na Security List).
