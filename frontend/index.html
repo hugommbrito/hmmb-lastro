@@ -18,6 +18,7 @@
     <h1>Lastro</h1>
     <p>Spike S1 (F0-02): estático servido pelo nginx na raiz. A resposta abaixo vem de <code>/api/health</code>, na mesma origem, sem CORS.</p>
     <pre id="health">carregando /api/health…</pre>
+    <p>Revisão 2: deploy disparado pelo webhook com Watch Paths <code>frontend/**</code>.</p>
   </main>
   <script>
     fetch("/api/health")
