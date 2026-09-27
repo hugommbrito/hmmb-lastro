@@ -12,7 +12,7 @@ Em conflito, vale a ordem:
 4. `HMMB_Finance_Handoff.md` (handoff de 24/09/2026).
 5. Wireframes em `docs/` (só UI).
 
-Infra: `docs/infra.md` (inventário do host OCI, F0-01) e `docs/runbooks/coolify-lastro.md` (projeto no Coolify, F0-02). Instruções do projeto no Claude.ai: `docs/claude-ai-instructions-v3.md`.
+Artefatos de design (PLAN §3): `docs/design/api-conventions.md` (DS-03) e os demais DS-xx conforme entram. Infra: `docs/infra.md` (inventário do host OCI, F0-01) e `docs/runbooks/coolify-lastro.md` (projeto no Coolify, F0-02). Instruções do projeto no Claude.ai: `docs/claude-ai-instructions-v3.md`.
 
 ## Produto e modelo
 
