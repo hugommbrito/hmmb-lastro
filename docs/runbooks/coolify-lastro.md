@@ -19,7 +19,7 @@ Projeto **Lastro** no Coolify (nome de exibição com maiúscula, como o Echo; o
 
 - **Painel:** `https://coolify.hmmb.app.br` (R-I1, 26/09): registro A no Registro.br e Settings → General → URL com esse valor; o Traefik serve o painel com Let's Encrypt. O acesso por `http://140.238.158.164:8000` está bloqueado pela Security List da OCI, que só libera 22, 80 e 443.
 - **Terminal:** Servers → oci-hmmb-apps → Terminal dá shell de root com `docker` disponível. Desde o R-I1 trafega pela 443 com TLS, em `/terminal/ws` do domínio do painel (o realtime vai em `/app`). Alternativa: SSH `ubuntu@140.238.158.164` seguido de `sudo -i`. O usuário `ubuntu` não está no grupo `docker` e deve continuar fora.
-- **Origem de código:** o GitHub App do Coolify tem acesso ao repositório `hugommbrito/hmmb-lastro` (dado em 26/09). Sem isso o Coolify não lista o repositório nem recebe webhooks.
+- **Origem de código:** o GitHub App do Coolify tem acesso ao repositório `hugommbrito/hmmb-lastro` (dado em 26/09). Sem isso o Coolify não lista o repositório nem recebe webhooks. A **Webhook URL do App** (github.com → Settings → Developer settings → GitHub Apps → o app → General → Webhook) precisa ser `https://coolify.hmmb.app.br/webhooks/source/github/events`: ela fica gravada no GitHub desde a criação do App e **não acompanha** a URL do painel. Depois do R-I1 ela ainda apontava para `http://140.238.158.164:8000`, o GitHub registrava "failed to connect to host" em Advanced → Recent Deliveries e os deploys automáticos pararam (o deploy manual não passa pelo webhook); corrigida em 26/09 e confirmada com Redeliver.
 - **Destino S3:** `oci-lastro-backups`, bucket `lastro-bckp-bucket` (`docs/infra.md` §7.3 e §7.4).
 
 ## 3. Bancos
@@ -130,7 +130,7 @@ Teste de 26/09: Success em 5 s, 865 B (banco vazio), disponível local e no S3. 
 
 ## 6. Deploys, healthcheck e Watch Paths
 
-- **Gatilho.** Push na branch configurada → webhook do GitHub App → o Coolify compara os arquivos alterados nos commits do push com os Watch Paths; sem casamento, o deploy é pulado. Deploy manual pelo painel ignora Watch Paths.
+- **Gatilho.** Push na branch configurada → webhook do GitHub App → o Coolify compara os arquivos alterados nos commits do push com os Watch Paths; sem casamento, o deploy é pulado. Deploy manual pelo painel ignora Watch Paths. Push sem deploy: olhe primeiro Recent Deliveries do GitHub App (§2).
 - **Teste de 26/09.** Push do commit `f8bb62e`, que só toca `docs/`: nenhum deploy, containers e imagens inalterados. Push do commit `a7f9506`, que só toca `frontend/index.html`: `lastro-web` redeployou pelo webhook para a imagem `dg8pc1…:a7f9506…` e `lastro-api` ficou na de `ec32009`. Critério de aceite dos Watch Paths atendido nos dois sentidos.
 - **Healthcheck.** O Coolify reconhece o `HEALTHCHECK` do Dockerfile ("Custom healthcheck found in Dockerfile") e só remove o container antigo depois de o novo ficar `healthy`. `node:24-slim` não tem `curl` nem `wget`, então o healthcheck da API usa `fetch` do próprio Node; o do nginx usa `wget` do BusyBox.
 - **Tempos observados.** Build da API 10 s e da web 3 s no host (imagens base já em cache); rolling update de 10 a 35 s, dominado pelo `start-period` e pelo intervalo do healthcheck.
@@ -162,7 +162,7 @@ Na ordem. Os passos 1 a 4 são do `docs/infra.md` (§4, §7 e §8).
 
 1. VM `VM.Standard.A1.Flex` arm64 em Toronto, Ubuntu 22.04, Coolify instalado; Security List com 22, 80 e 443 apenas. Enquanto o domínio do painel não existir, liberar 8000 e 6001–6002 temporariamente para o seu IP e fechá-las depois (R-I1). Swapfile de 4 GB com `vm.swappiness=10`; auto-update do Coolify desligado; Docker Cleanup `0 4 * * *` com limiar 80%.
 2. Registros A `lastro.hmmb.app.br` e `coolify.hmmb.app.br` apontando para o novo IP no Registro.br; esperar a propagação. Settings → General → URL `https://coolify.hmmb.app.br` antes de fechar as portas do painel.
-3. GitHub App do Coolify com acesso a `hugommbrito/hmmb-lastro`.
+3. GitHub App do Coolify com acesso a `hugommbrito/hmmb-lastro` e Webhook URL `https://coolify.hmmb.app.br/webhooks/source/github/events` (§2); conferir em Recent Deliveries depois do primeiro push.
 4. Object Storage: bucket `lastro-bckp-bucket`, usuário `svc-coolify-backups` com policy restrita ao bucket, Customer Secret Key; S3 Storage `oci-lastro-backups` validado no Coolify.
 5. Projeto `Lastro`; Postgres e Redis conforme §3 (imagem, configuração custom, limites, sem porta pública). Novas senhas geradas vão para o 1Password.
 6. Restaurar o último dump do bucket no Postgres (`pg_restore` para o banco `lastro`; procedimento detalhado na F0-22).
